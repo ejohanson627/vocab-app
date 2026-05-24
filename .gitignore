@@ -1,0 +1,15 @@
+# Source data (Excel, images) — kept local, not committed
+data/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc

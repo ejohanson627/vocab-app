@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lexicon</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #FAFAF7;
+    --card-bg: #FFFFFF;
+    --text-primary: #1A1A1A;
+    --text-secondary: #6B6B6B;
+    --text-tertiary: #9A9A9A;
+    --accent: #2D2D2D;
+    --accent-light: #E8E8E4;
+    --border: #E5E5E0;
+    --success: #4A7C59;
+    --success-light: #EDF5EF;
+    --warning: #8B6914;
+    --warning-light: #FDF8EC;
+    --error: #9B3B3B;
+    --error-light: #FAEFEF;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 2.4rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .header .subtitle {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+
+  /* Navigation */
+  .nav {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 32px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+
+  .nav button {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: var(--transition);
+  }
+
+  .nav button.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .nav button:hover:not(.active) {
+    background: var(--accent-light);
+    color: var(--text-primary);
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 28px;
+    padding: 16px 0;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+  }
+
+  /* Flashcard */
+  .card-container {
+    perspective: 1200px;
+    margin-bottom: 28px;
+    flex-shrink: 0;
+  }
+
+  .flashcard {
+    position: relative;
+    width: 100%;
+    min-height: 320px;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .flashcard.flipped {
+    transform: rotateY(180deg);
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    text-align: center;
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+  }
+
+  .card-word {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.6rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .card-pos {
+    font-size: 0.72rem;
+    font-style: italic;
+    color: var(--text-tertiary);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .card-pronunciation {
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    font-style: italic;
+  }
+
+  .card-hint {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    margin-top: 24px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .card-definition {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+  }
+
+  .card-example {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 90%;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  .card-number {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.05em;
+  }
+
+  .speak-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    margin-top: 12px;
+  }
+
+  .speak-btn:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .speak-btn.speaking {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    animation: pulse-ring 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(45,45,45,0.1); }
+    50% { box-shadow: 0 0 0 6px rgba(45,45,45,0); }
+  }
+
+  .card-mastery {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .mastery-new { background: var(--accent-light); color: var(--text-secondary); }
+  .mastery-learning { background: var(--warning-light); color: var(--warning); }
+  .mastery-known { background: var(--success-light); color: var(--success); }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    padding: 12px 28px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-know {
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  .btn-know:hover {
+    background: var(--success-light);
+    border-color: var(--success);
+  }
+
+  .btn-unsure {
+    border-color: var(--warning);
+    color: var(--warning);
+  }
+
+  .btn-unsure:hover {
+    background: var(--warning-light);
+  }
+
+  .btn-skip {
+    border-color: var(--border);
+    color: var(--text-tertiary);
+  }
+
+  .nav-controls {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 8px;
+  }
+
+  .nav-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: var(--transition);
+  }
+
+  .nav-btn:hover { color: var(--text-primary); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  /* Progress Bar */
+  .progress-container {
+    margin-bottom: 28px;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--accent-light);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.5s ease;
+    border-radius: 1px;
+  }
+
+  .progress-text {
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  /* List View */
+  .list-view {
+    display: none;
+  }
+
+  .list-view.active { display: block; }
+  .card-view.active { display: block; }
+  .card-view { display: none; }
+  .stats-view { display: none; }
+  .stats-view.active { display: block; }
+
+  .filter-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .search-box {
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    outline: none;
+    margin-bottom: 16px;
+    transition: var(--transition);
+  }
+
+  .search-box:focus {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .search-box::placeholder { color: var(--text-tertiary); }
+
+  .word-list {
+    list-style: none;
+  }
+
+  .word-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .word-item:hover { padding-left: 8px; }
+
+  .word-item-left {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .word-item-word {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .word-item-pos {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--text-tertiary);
+  }
+
+  .word-item-def {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    max-width: 55%;
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  .word-item-badge {
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Stats View */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stats-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+
+  .stats-card .stat-value {
+    font-size: 2rem;
+  }
+
+  .streak-display {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 32px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .streak-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .reset-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    padding: 10px 24px;
+    border: 1px solid var(--error);
+    background: transparent;
+    color: var(--error);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 24px;
+  }
+
+  .reset-btn:hover {
+    background: var(--error-light);
+  }
+
+  /* Session Mode Selector */
+  .session-options {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .session-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .session-btn.active {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    background: var(--accent-light);
+  }
+
+  /* Keyboard hints */
+  .keyboard-hints {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.05em;
+  }
+
+  .keyboard-hints kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.6rem;
+    margin: 0 2px;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .app { padding: 24px 16px; }
+    .card-word { font-size: 2rem; }
+    .card-face { padding: 36px 24px; }
+    .stats-bar { gap: 20px; }
+    .word-item-def { max-width: 45%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1>Lexicon</h1>
+    <div class="subtitle">after David Foster Wallace</div>
+  </div>
+
+  <div class="nav">
+    <button class="active" onclick="switchView('card')">Study</button>
+    <button onclick="switchView('list')">Browse</button>
+    <button onclick="switchView('stats')">Progress</button>
+  </div>
+
+  <!-- CARD VIEW -->
+  <div class="card-view active" id="cardView">
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-value" id="knownCount">0</div>
+        <div class="stat-label">Known</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="learningCount">0</div>
+        <div class="stat-label">Learning</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="remainingCount">0</div>
+        <div class="stat-label">Remaining</div>
+      </div>
+    </div>
+
+    <div class="session-options">
+      <button class="session-btn active" onclick="setSessionMode('all')">All Words</button>
+      <button class="session-btn" onclick="setSessionMode('new')">New Only</button>
+      <button class="session-btn" onclick="setSessionMode('learning')">Learning</button>
+      <button class="session-btn" onclick="setSessionMode('shuffle')">Shuffle</button>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+      <div class="progress-text" id="progressText">1 / 100</div>
+    </div>
+
+    <div class="card-container" onclick="flipCard()">
+      <div class="flashcard" id="flashcard">
+        <div class="card-face card-front">
+          <div class="card-mastery mastery-new" id="cardMastery">New</div>
+          <div class="card-number" id="cardNumber">1 / 100</div>
+          <div class="card-word" id="cardWord">—</div>
+          <div class="card-pos" id="cardPos"></div>
+          <div class="card-pronunciation" id="cardPronunciation"></div>
+          <button class="speak-btn" id="speakBtn" onclick="event.stopPropagation(); speakWord()" title="Pronounce word">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+          </button>
+          <div class="card-hint">tap to reveal</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-mastery mastery-new" id="cardMasteryBack">New</div>
+          <div class="card-number" id="cardNumberBack">1 / 100</div>
+          <div class="card-word" id="cardWordBack" style="font-size:1.6rem; margin-bottom:16px;">—</div>
+          <div class="card-definition" id="cardDefinition">—</div>
+          <div class="card-example" id="cardExample"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-unsure" onclick="markWord('learning')">Still Learning</button>
+      <button class="btn btn-know" onclick="markWord('known')">Know It</button>
+    </div>
+
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn" onclick="prevCard()">&#8592; Prev</button>
+      <button class="nav-btn" onclick="skipCard()">Skip &#8594;</button>
+    </div>
+
+    <div class="keyboard-hints">
+      <kbd>Space</kbd> flip &nbsp; <kbd>&#8592;</kbd> prev &nbsp; <kbd>&#8594;</kbd> next &nbsp; <kbd>1</kbd> learning &nbsp; <kbd>2</kbd> known &nbsp; <kbd>S</kbd> speak
+    </div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div class="list-view" id="listView">
+    <input type="text" class="search-box" placeholder="Search words..." oninput="filterList(this.value)" id="searchBox">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setListFilter('all')">All</button>
+      <button class="filter-btn" onclick="setListFilter('new')">New</button>
+      <button class="filter-btn" onclick="setListFilter('learning')">Learning</button>
+      <button class="filter-btn" onclick="setListFilter('known')">Known</button>
+    </div>
+    <ul class="word-list" id="wordList"></ul>
+  </div>
+
+  <!-- STATS VIEW -->
+  <div class="stats-view" id="statsView">
+    <div class="streak-display">
+      <div class="stat-label" style="margin-bottom:8px">Current Streak</div>
+      <div class="streak-number" id="streakNumber">0</div>
+      <div class="stat-label" style="margin-top:4px">days</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stats-card">
+        <div class="stat-value" id="statsKnown">0</div>
+        <div class="stat-label">Mastered</div>
+      </div>
+      <div class="stats-card">
+        <div class="stat-value" id="statsLearning">0</div>
+        <div class="stat-label">Learning</div>
+      </div>
+      <div class="stats-card">
+        <div class="stat-value" id="statsNew">0</div>
+        <div class="stat-label">Unseen</div>
+      </div>
+      <div class="stats-card">
+        <div class="stat-value" id="statsSessions">0</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+    </div>
+
+    <div style="text-align:center">
+      <button class="reset-btn" onclick="resetProgress()">Reset All Progress</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const VOCAB = [
+  { word: "sesquipedalian", pos: "adj.", pronunciation: "/ˌsɛs.kwɪ.pɪˈdeɪ.li.ən/", definition: "Given to or characterized by the use of long words; polysyllabic to excess.", example: "His sesquipedalian tendencies made even casual conversation feel like a doctoral defense." },
+  { word: "anfractuous", pos: "adj.", pronunciation: "/ænˈfræk.tʃu.əs/", definition: "Sinuous, winding; full of twists and turns, both literally and figuratively.", example: "The anfractuous logic of the argument required three readings to follow." },
+  { word: "apothegm", pos: "n.", pronunciation: "/ˈæp.ə.θɛm/", definition: "A concise, pithy saying or maxim; a terse remark conveying some important truth.", example: "He collected apothegms the way others collected stamps — obsessively and without clear purpose." },
+  { word: "crepuscular", pos: "adj.", pronunciation: "/krɪˈpʌs.kjə.lər/", definition: "Of, resembling, or relating to twilight; dim, indistinct.", example: "The crepuscular light gave everything a quality of being not-quite-real." },
+  { word: "defenestrate", pos: "v.", pronunciation: "/diːˈfɛn.ɪ.streɪt/", definition: "To throw (a person or thing) out of a window; figuratively, to dismiss summarily.", example: "She mentally defenestrated every assumption she'd held about the project." },
+  { word: "diaphanous", pos: "adj.", pronunciation: "/daɪˈæf.ə.nəs/", definition: "Light, delicate, and translucent; so fine as to be almost transparent.", example: "The diaphanous curtain did nothing to block the interrogative midwestern sun." },
+  { word: "effulgent", pos: "adj.", pronunciation: "/ɪˈfʌl.dʒənt/", definition: "Shining brightly; radiant, resplendent.", example: "Her effulgent confidence was almost painful to witness up close." },
+  { word: "enervate", pos: "v.", pronunciation: "/ˈɛn.ər.veɪt/", definition: "To weaken or drain of energy, vitality, or strength.", example: "The relentless humidity enervated everyone except the flies." },
+  { word: "epistemic", pos: "adj.", pronunciation: "/ˌɛp.ɪˈstɛm.ɪk/", definition: "Relating to knowledge or the conditions for acquiring it.", example: "The epistemic uncertainty was the whole point — not a bug but a feature of the inquiry." },
+  { word: "equipoise", pos: "n.", pronunciation: "/ˈɛk.wɪ.pɔɪz/", definition: "A state of balance or equilibrium; counterbalancing weight or force.", example: "He maintained an equipoise between sincerity and irony that was itself a kind of art form." },
+  { word: "etiolate", pos: "v.", pronunciation: "/ˈiː.ti.ə.leɪt/", definition: "To make pale and weak, especially through deprivation of light; to drain of vigor.", example: "Years of fluorescent-lit cubicle work had etiolated his once-robust enthusiasm for anything." },
+  { word: "exegesis", pos: "n.", pronunciation: "/ˌɛk.sɪˈdʒiː.sɪs/", definition: "Critical explanation or interpretation of a text, especially scripture.", example: "His exegesis of the tax code was, improbably, the most engaging talk of the conference." },
+  { word: "fatuous", pos: "adj.", pronunciation: "/ˈfætʃ.u.əs/", definition: "Silly and pointless; devoid of intelligence or substance.", example: "The fatuous grin suggested a person entirely unbothered by the complexity of what he'd just said." },
+  { word: "febrile", pos: "adj.", pronunciation: "/ˈfɛb.raɪl/", definition: "Having or showing the symptoms of a fever; feverishly excited or energetic.", example: "The febrile atmosphere of the trading floor was both thrilling and nauseating." },
+  { word: "fecund", pos: "adj.", pronunciation: "/ˈfɛk.ənd/", definition: "Highly fertile; intellectually productive or inventive to a remarkable degree.", example: "A fecund imagination is a mixed blessing when you're trying to fall asleep." },
+  { word: "fungible", pos: "adj.", pronunciation: "/ˈfʌn.dʒɪ.bəl/", definition: "Mutually interchangeable; replaceable by another identical item.", example: "The administration treated analysts as fungible units, which was both insulting and inaccurate." },
+  { word: "genuflect", pos: "v.", pronunciation: "/ˈdʒɛn.jʊ.flɛkt/", definition: "To bend the knee, as in worship; to show servile deference.", example: "He refused to genuflect before the received wisdom of the department." },
+  { word: "hermeneutic", pos: "adj.", pronunciation: "/ˌhɜːr.məˈnjuː.tɪk/", definition: "Concerning interpretation, especially of scripture, texts, or philosophical works.", example: "The hermeneutic challenges of the footnotes alone could occupy a graduate seminar." },
+  { word: "histrionic", pos: "adj.", pronunciation: "/ˌhɪs.triˈɒn.ɪk/", definition: "Excessively theatrical or dramatic in character or style.", example: "His histrionic reaction to the parking ticket was, in fairness, genuinely entertaining." },
+  { word: "inchoate", pos: "adj.", pronunciation: "/ɪnˈkoʊ.eɪt/", definition: "Just begun and so not fully formed or developed; rudimentary.", example: "The idea was still inchoate — more a feeling than a thesis." },
+  { word: "insuperable", pos: "adj.", pronunciation: "/ɪnˈsuː.pər.ə.bəl/", definition: "Impossible to overcome; insurmountable.", example: "What seemed insuperable at midnight became merely difficult by morning." },
+  { word: "irenic", pos: "adj.", pronunciation: "/aɪˈrɛn.ɪk/", definition: "Aiming or aimed at peace; conciliatory.", example: "Her irenic tone belied the devastating precision of her counterargument." },
+  { word: "lassitude", pos: "n.", pronunciation: "/ˈlæs.ɪ.tjuːd/", definition: "A state of physical or mental weariness; lack of energy.", example: "A post-Thanksgiving lassitude settled over the entire campus like weather." },
+  { word: "liminal", pos: "adj.", pronunciation: "/ˈlɪm.ɪ.nəl/", definition: "Occupying a position at, or on both sides of, a boundary or threshold.", example: "The liminal space between sleeping and waking was where his best ideas lived and died." },
+  { word: "mendacious", pos: "adj.", pronunciation: "/mɛnˈdeɪ.ʃəs/", definition: "Not telling the truth; lying; habitually dishonest.", example: "The mendacious charm of the brochure bore no relation to the actual hotel." },
+  { word: "metastatic", pos: "adj.", pronunciation: "/ˌmɛt.əˈstæt.ɪk/", definition: "Relating to or affected by metastasis; spreading from one part to another.", example: "The rumor proved metastatic, reaching departments that didn't even exist yet." },
+  { word: "milieu", pos: "n.", pronunciation: "/miːlˈjɜː/", definition: "A person's social environment; the physical or social setting in which something occurs.", example: "The academic milieu rewarded a very specific kind of performative intelligence." },
+  { word: "nacreous", pos: "adj.", pronunciation: "/ˈneɪ.kri.əs/", definition: "Having the iridescent luster of mother-of-pearl.", example: "The nacreous quality of the light on the lake made everything feel briefly sacred." },
+  { word: "nascent", pos: "adj.", pronunciation: "/ˈnæs.ənt/", definition: "Just coming into existence and beginning to display signs of future potential.", example: "His nascent understanding of the problem was enough to be dangerous but not yet useful." },
+  { word: "numinous", pos: "adj.", pronunciation: "/ˈnjuː.mɪ.nəs/", definition: "Having a strong religious or spiritual quality; indicating the presence of the divine.", example: "The experience was numinous in a way that resisted the very language you'd need to describe it." },
+  { word: "obsequious", pos: "adj.", pronunciation: "/əbˈsiː.kwi.əs/", definition: "Obedient or attentive to an excessive or servile degree.", example: "The obsequious waiter made dining feel less like a meal and more like a hostage negotiation." },
+  { word: "ontological", pos: "adj.", pronunciation: "/ˌɒn.təˈlɒdʒ.ɪ.kəl/", definition: "Relating to the branch of metaphysics dealing with the nature of being.", example: "The ontological status of the self was not, it turned out, a great first-date topic." },
+  { word: "opprobrium", pos: "n.", pronunciation: "/əˈproʊ.bri.əm/", definition: "Harsh criticism or censure; public disgrace arising from shameful conduct.", example: "He bore the opprobrium of the committee with a dignity that infuriated them further." },
+  { word: "palimpsest", pos: "n.", pronunciation: "/ˈpæl.ɪmp.sɛst/", definition: "A manuscript on which earlier writing has been effaced for later writing; something reused but bearing traces of its earlier form.", example: "The city was a palimpsest — every demolished building still somehow present in the skyline." },
+  { word: "parsimonious", pos: "adj.", pronunciation: "/ˌpɑːr.sɪˈmoʊ.ni.əs/", definition: "Extremely unwilling to spend money or use resources; excessively frugal.", example: "His parsimonious prose style — never two words where one would do — was either admirable or maddening." },
+  { word: "pellucid", pos: "adj.", pronunciation: "/pəˈluː.sɪd/", definition: "Translucently clear; easily understood; lucid.", example: "Her pellucid explanation made the rest of us realize we'd been overcomplicating everything." },
+  { word: "penumbra", pos: "n.", pronunciation: "/pɪˈnʌm.brə/", definition: "The partially shaded outer region of a shadow; a surrounding area of uncertainty.", example: "The penumbra of implications around his statement kept everyone parsing for days." },
+  { word: "perfidious", pos: "adj.", pronunciation: "/pərˈfɪd.i.əs/", definition: "Deceitful and untrustworthy; treacherous.", example: "The perfidious autocorrect changed the entire tenor of the apology." },
+  { word: "peripatetic", pos: "adj.", pronunciation: "/ˌpɛr.ɪ.pəˈtɛt.ɪk/", definition: "Traveling from place to place; itinerant.", example: "His peripatetic childhood — seven schools in nine years — gave him an anthropologist's eye for social dynamics." },
+  { word: "pleonasm", pos: "n.", pronunciation: "/ˈpliː.ə.næz.əm/", definition: "The use of more words than necessary to convey meaning; redundancy.", example: "Calling it a 'free gift' is a pleonasm, but one that marketing has made feel entirely natural." },
+  { word: "polysemous", pos: "adj.", pronunciation: "/ˌpɒl.ɪˈsiː.məs/", definition: "Having multiple meanings or interpretations.", example: "The most polysemous words — love, freedom, justice — are precisely the ones we argue about most." },
+  { word: "prolix", pos: "adj.", pronunciation: "/proʊˈlɪks/", definition: "Using or containing too many words; tediously lengthy.", example: "The prolix memorandum could have been an email, which itself could have been a sentence." },
+  { word: "propinquity", pos: "n.", pronunciation: "/prəˈpɪŋ.kwɪ.ti/", definition: "The state of being close to someone or something; proximity, nearness.", example: "Mere propinquity — sharing an office wall — had fostered an unlikely intellectual partnership." },
+  { word: "recondite", pos: "adj.", pronunciation: "/ˈrɛk.ən.daɪt/", definition: "Little known; abstruse; dealing with or treating something very obscure.", example: "His recondite knowledge of 14th-century shipping manifests was, against all odds, exactly what the case required." },
+  { word: "reify", pos: "v.", pronunciation: "/ˈriː.ɪ.faɪ/", definition: "To make something abstract more concrete or real; to regard an abstraction as material.", example: "The danger was in reifying what was always meant to be a provisional metaphor." },
+  { word: "simulacrum", pos: "n.", pronunciation: "/ˌsɪm.jʊˈleɪ.krəm/", definition: "An image or representation of something; an unsatisfying imitation or substitute.", example: "The theme park version of Main Street was a simulacrum so convincing it made you doubt the original." },
+  { word: "solipsistic", pos: "adj.", pronunciation: "/ˌsɒl.ɪpˈsɪs.tɪk/", definition: "Characteristic of the view that the self is all that exists or can be known; extremely self-absorbed.", example: "The solipsistic quality of social media — everyone broadcasting, nobody listening — was its defining feature." },
+  { word: "soporific", pos: "adj.", pronunciation: "/ˌsɒp.əˈrɪf.ɪk/", definition: "Tending to induce drowsiness or sleep; tediously boring.", example: "The soporific drone of the overhead projector fan was the lecture's only consistent element." },
+  { word: "specious", pos: "adj.", pronunciation: "/ˈspiː.ʃəs/", definition: "Superficially plausible but actually wrong; misleadingly attractive.", example: "The argument was specious in a way that took real effort to dismantle, which was itself suspicious." },
+  { word: "stochastic", pos: "adj.", pronunciation: "/stəˈkæs.tɪk/", definition: "Randomly determined; having a pattern that may be analyzed statistically but not predicted precisely.", example: "The stochastic nature of creative breakthroughs resists every attempt at systematization." },
+  { word: "sui generis", pos: "adj.", pronunciation: "/ˌsuː.i ˈdʒɛn.ər.ɪs/", definition: "Unique; constituting a class of its own; unlike anything else.", example: "The institution was sui generis — part think tank, part monastery, part summer camp." },
+  { word: "supererogatory", pos: "adj.", pronunciation: "/ˌsuː.pər.ɪˈrɒɡ.ə.tər.i/", definition: "Going beyond what is required or expected; exceeding duty.", example: "The supererogatory footnotes contained a second, arguably better book." },
+  { word: "synecdoche", pos: "n.", pronunciation: "/sɪˈnɛk.də.ki/", definition: "A figure of speech in which a part represents the whole or vice versa.", example: "Calling a car 'wheels' is synecdoche, the kind of casual metonymy we perform without thinking." },
+  { word: "tautological", pos: "adj.", pronunciation: "/ˌtɔː.təˈlɒdʒ.ɪ.kəl/", definition: "Using different words to say the same thing; logically true by definition but uninformative.", example: "The committee's conclusion was tautological — we should do what's best, they said, because that would be best." },
+  { word: "tendentious", pos: "adj.", pronunciation: "/tɛnˈdɛn.ʃəs/", definition: "Expressing or intending to promote a particular cause or point of view, especially a controversial one.", example: "The documentary was tendentious enough that even sympathetic viewers felt manipulated." },
+  { word: "tenebrous", pos: "adj.", pronunciation: "/ˈtɛn.ɪ.brəs/", definition: "Dark, shadowy, or obscure.", example: "The tenebrous corridors of the administrative building seemed designed to discourage inquiry." },
+  { word: "veridical", pos: "adj.", pronunciation: "/vəˈrɪd.ɪ.kəl/", definition: "Truthful; corresponding to facts.", example: "The account was veridical in every detail, which somehow made it less believable." },
+  { word: "vitiate", pos: "v.", pronunciation: "/ˈvɪʃ.i.eɪt/", definition: "To spoil or impair the quality or efficiency of; to invalidate.", example: "A single methodological error can vitiate an otherwise elegant study." },
+  { word: "voluble", pos: "adj.", pronunciation: "/ˈvɒl.jʊ.bəl/", definition: "Speaking or spoken incessantly and fluently.", example: "She was voluble on the subject of her research and monosyllabic on everything else." },
+  { word: "aporia", pos: "n.", pronunciation: "/əˈpɔːr.i.ə/", definition: "An irresolvable internal contradiction or logical disjunction in a text, argument, or theory.", example: "The aporia at the center of the theory was either its fatal flaw or its deepest insight." },
+  { word: "cathexis", pos: "n.", pronunciation: "/kəˈθɛk.sɪs/", definition: "The concentration of mental energy on a particular person, idea, or object.", example: "His cathexis toward the project bordered on the unhealthy, though it produced remarkable work." },
+  { word: "clerisy", pos: "n.", pronunciation: "/ˈklɛr.ɪ.si/", definition: "A distinct class of learned or literary people; the intelligentsia.", example: "The literary clerisy's opinions mattered less than they believed, and more than they feared." },
+  { word: "concatenation", pos: "n.", pronunciation: "/kɒnˌkæt.ɪˈneɪ.ʃən/", definition: "A series of interconnected things or events linked together.", example: "The concatenation of small failures produced a catastrophe that no single error could explain." },
+  { word: "deracinate", pos: "v.", pronunciation: "/dɪˈræs.ɪ.neɪt/", definition: "To uproot; to tear from the ground or from one's native environment.", example: "Graduate school had deracinated her from the very community she'd wanted to study." },
+  { word: "dialectical", pos: "adj.", pronunciation: "/ˌdaɪ.əˈlɛk.tɪ.kəl/", definition: "Relating to the logical discussion of ideas; concerned with investigating the truth of opinions through reasoned argument.", example: "The dialectical structure of the essay made it feel like watching someone argue with themselves and lose." },
+  { word: "discursive", pos: "adj.", pronunciation: "/dɪˈskɜːr.sɪv/", definition: "Digressing from subject to subject; moving from topic to topic without order.", example: "His discursive lecturing style was either maddening or brilliant depending on your tolerance for ambiguity." },
+  { word: "effete", pos: "adj.", pronunciation: "/ɪˈfiːt/", definition: "No longer capable of effective action; affected, overrefined.", example: "The criticism that literary fiction had become effete was itself a kind of effete literary argument." },
+  { word: "eleemosynary", pos: "adj.", pronunciation: "/ˌɛl.ɪˈmɒz.ɪ.nɛr.i/", definition: "Relating to or dependent on charity; charitable.", example: "The university's eleemosynary origins sat awkwardly beside its current tuition figures." },
+  { word: "elide", pos: "v.", pronunciation: "/ɪˈlaɪd/", definition: "To omit or suppress; to join together or merge.", example: "The memoir elided the most painful years entirely, which told you everything." },
+  { word: "ennui", pos: "n.", pronunciation: "/ɒnˈwiː/", definition: "A feeling of listlessness and dissatisfaction arising from lack of occupation or excitement.", example: "The ennui was the specific kind produced by having too many choices and insufficient reasons to choose." },
+  { word: "eschew", pos: "v.", pronunciation: "/ɪsˈtʃuː/", definition: "To deliberately avoid or keep away from.", example: "He eschewed small talk with a vigor that itself became a conversation topic." },
+  { word: "excoriate", pos: "v.", pronunciation: "/ɪkˈskɔːr.i.eɪt/", definition: "To criticize severely; to censure or denounce vehemently.", example: "The review excoriated the novel so thoroughly it almost made you want to read it." },
+  { word: "fustian", pos: "adj.", pronunciation: "/ˈfʌs.tʃən/", definition: "Pompous or pretentious speech or writing; inflated and turgid.", example: "Beneath the fustian rhetoric was a surprisingly simple and not unpersuasive point." },
+  { word: "hegemony", pos: "n.", pronunciation: "/hɪˈdʒɛm.ə.ni/", definition: "Leadership or dominance, especially by one state or social group over others.", example: "The cultural hegemony of a certain kind of irony made sincerity feel like a radical act." },
+  { word: "heuristic", pos: "adj.", pronunciation: "/hjʊˈrɪs.tɪk/", definition: "Enabling a person to discover or learn something for themselves; proceeding by trial and error.", example: "The heuristic approach — try everything, see what sticks — was messy but undeniably effective." },
+  { word: "ineluctable", pos: "adj.", pronunciation: "/ˌɪn.ɪˈlʌk.tə.bəl/", definition: "Unable to be resisted or avoided; inescapable.", example: "The ineluctable logic of the situation left no room for the comfortable fictions they'd been enjoying." },
+  { word: "jejune", pos: "adj.", pronunciation: "/dʒɪˈdʒuːn/", definition: "Naive, simplistic, and superficial; lacking nourishment.", example: "The analysis was jejune — the intellectual equivalent of cotton candy." },
+  { word: "lacuna", pos: "n.", pronunciation: "/ləˈkjuː.nə/", definition: "An unfilled space or gap; a missing portion in a manuscript or text.", example: "The lacuna in the historical record was itself a kind of evidence." },
+  { word: "logomachy", pos: "n.", pronunciation: "/lɒˈɡɒm.ə.ki/", definition: "An argument about words or their meaning; a dispute carried on in words only.", example: "What passed for intellectual debate was often mere logomachy — furious agreement disguised as conflict." },
+  { word: "lugubrious", pos: "adj.", pronunciation: "/ləˈɡuː.bri.əs/", definition: "Looking or sounding sad and dismal; mournful.", example: "The lugubrious tone of the memo made a budget revision feel like an elegy." },
+  { word: "maculate", pos: "v.", pronunciation: "/ˈmæk.jʊ.leɪt/", definition: "To spot, stain, or pollute; marked with spots.", example: "The otherwise pristine argument was maculated by a single, devastating counterexample." },
+  { word: "metonymy", pos: "n.", pronunciation: "/mɪˈtɒn.ɪ.mi/", definition: "The substitution of the name of an attribute or adjunct for that of the thing meant.", example: "When people say 'Washington' to mean the government, that's metonymy doing invisible work." },
+  { word: "nugatory", pos: "adj.", pronunciation: "/ˈnjuː.ɡə.tɔːr.i/", definition: "Having no purpose or value; futile, worthless.", example: "The committee's recommendations proved nugatory — filed, forgotten, and functionally nonexistent." },
+  { word: "obloquy", pos: "n.", pronunciation: "/ˈɒb.lə.kwi/", definition: "Strong public criticism or verbal abuse; the state of being held in utter contempt.", example: "She endured the obloquy of the internet with a grace that was almost annoying." },
+  { word: "palaver", pos: "n.", pronunciation: "/pəˈlæv.ər/", definition: "Prolonged and idle discussion; unnecessarily elaborate or complex procedure.", example: "After an hour of procedural palaver, the actual decision took thirty seconds." },
+  { word: "perspicacious", pos: "adj.", pronunciation: "/ˌpɜːr.spɪˈkeɪ.ʃəs/", definition: "Having a ready insight into and understanding of things; shrewd.", example: "Her perspicacious reading of the room saved them from a catastrophically ill-timed joke." },
+  { word: "plangent", pos: "adj.", pronunciation: "/ˈplæn.dʒənt/", definition: "Loud and resonant, with a mournful tone.", example: "The plangent notes of the cello seemed to articulate something the lyrics couldn't." },
+  { word: "probative", pos: "adj.", pronunciation: "/ˈproʊ.bə.tɪv/", definition: "Affording proof or evidence; serving to test or try.", example: "The most probative detail in the testimony was the one the witness mentioned in passing." },
+  { word: "propitiate", pos: "v.", pronunciation: "/prəˈpɪʃ.i.eɪt/", definition: "To win or regain the favor of by doing something pleasing; to appease.", example: "No amount of complimentary breakfast could propitiate the guests after the fire alarm." },
+  { word: "recusant", pos: "adj.", pronunciation: "/ˈrɛk.jʊ.zənt/", definition: "Refusing to submit to an authority or to comply with a regulation.", example: "His recusant attitude toward the new software made him either a principled holdout or an obstruction, depending on your perspective." },
+  { word: "rhadamanthine", pos: "adj.", pronunciation: "/ˌræd.əˈmæn.θɪn/", definition: "Showing stern and inflexible judgment.", example: "The rhadamanthine grading rubric left no room for the merely competent." },
+  { word: "sclerotic", pos: "adj.", pronunciation: "/sklɪˈrɒt.ɪk/", definition: "Rigid, unresponsive; having lost the ability to adapt.", example: "The sclerotic bureaucracy processed innovation requests with geological speed." },
+  { word: "shibboleth", pos: "n.", pronunciation: "/ˈʃɪb.ə.lɛθ/", definition: "A custom, principle, or belief distinguishing a particular group; a widely held but unfounded belief.", example: "The pronunciation of 'data' had become a shibboleth separating the scientists from the engineers." },
+  { word: "solecism", pos: "n.", pronunciation: "/ˈsɒl.ɪ.sɪz.əm/", definition: "A grammatical mistake in speech or writing; a breach of good manners or etiquette.", example: "His use of 'irregardless' was a solecism he committed so confidently it almost seemed intentional." },
+  { word: "stridulate", pos: "v.", pronunciation: "/ˈstrɪdʒ.ʊ.leɪt/", definition: "To make a shrill creaking noise by rubbing body parts together, as crickets do.", example: "The fluorescent lights stridulated at a frequency calibrated to maximum distraction." },
+  { word: "teleological", pos: "adj.", pronunciation: "/ˌtɛl.i.əˈlɒdʒ.ɪ.kəl/", definition: "Relating to or involving the explanation of phenomena by the purpose they serve.", example: "The teleological assumption — that everything happens for a reason — was comforting but epistemically suspect." },
+  { word: "tmesis", pos: "n.", pronunciation: "/tˈmiː.sɪs/", definition: "The separation of parts of a compound word by an intervening word.", example: "Saying 'abso-bloody-lutely' is tmesis, and it's more fun to do than to define." },
+  { word: "trenchant", pos: "adj.", pronunciation: "/ˈtrɛn.tʃənt/", definition: "Vigorous or incisive in expression or style; cutting, keen.", example: "Her trenchant critique left the proposal looking less like a plan and more like a wish." },
+  { word: "unctuous", pos: "adj.", pronunciation: "/ˈʌŋk.tʃu.əs/", definition: "Excessively or ingratiatingly flattering; oily.", example: "The unctuous praise in the introduction made the subsequent rejection all the more painful." },
+  { word: "usufruct", pos: "n.", pronunciation: "/ˈjuː.zjʊ.frʌkt/", definition: "The legal right to use and derive profit from property belonging to another.", example: "The arrangement was a kind of intellectual usufruct — he used her ideas and she got the acknowledgments page." },
+  { word: "verisimilitude", pos: "n.", pronunciation: "/ˌvɛr.ɪ.sɪˈmɪl.ɪ.tjuːd/", definition: "The appearance of being true or real.", example: "The novel's verisimilitude was so persuasive that readers kept asking which parts were autobiographical." }
+];
+
+// State
+let state = loadState();
+let currentIndex = 0;
+let sessionQueue = [];
+let sessionMode = 'all';
+let listFilter = 'all';
+let searchTerm = '';
+
+function defaultState() {
+  return {
+    words: {},
+    sessions: 0,
+    streak: 0,
+    lastDate: null,
+    firstUsed: new Date().toISOString()
+  };
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('lexicon_state');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem('lexicon_state', JSON.stringify(state));
+}
+
+function getWordState(word) {
+  return state.words[word] || { status: 'new', seen: 0, lastSeen: null };
+}
+
+function setWordState(word, status) {
+  const ws = getWordState(word);
+  ws.status = status;
+  ws.seen = (ws.seen || 0) + 1;
+  ws.lastSeen = new Date().toISOString();
+  state.words[word] = ws;
+  saveState();
+}
+
+function updateStreak() {
+  const today = new Date().toISOString().split('T')[0];
+  if (state.lastDate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (state.lastDate === yesterday) {
+    state.streak++;
+  } else if (state.lastDate !== today) {
+    state.streak = 1;
+  }
+  state.lastDate = today;
+  state.sessions++;
+  saveState();
+}
+
+// Queue management
+function buildQueue() {
+  let pool;
+  switch(sessionMode) {
+    case 'new':
+      pool = VOCAB.filter(w => getWordState(w.word).status === 'new');
+      break;
+    case 'learning':
+      pool = VOCAB.filter(w => getWordState(w.word).status === 'learning');
+      break;
+    case 'shuffle':
+      pool = [...VOCAB];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      break;
+    default:
+      pool = [...VOCAB];
+  }
+  sessionQueue = pool;
+  currentIndex = 0;
+}
+
+function setSessionMode(mode) {
+  sessionMode = mode;
+  document.querySelectorAll('.session-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  buildQueue();
+  renderCard();
+}
+
+// Card rendering
+function renderCard() {
+  if (sessionQueue.length === 0) {
+    document.getElementById('cardWord').textContent = 'No words';
+    document.getElementById('cardPos').textContent = '';
+    document.getElementById('cardPronunciation').textContent = '';
+    document.getElementById('cardDefinition').textContent = 'Try a different filter.';
+    document.getElementById('cardExample').textContent = '';
+    return;
+  }
+
+  const word = sessionQueue[currentIndex];
+  const ws = getWordState(word.word);
+
+  // Unflip
+  document.getElementById('flashcard').classList.remove('flipped');
+
+  // Front
+  document.getElementById('cardWord').textContent = word.word;
+  document.getElementById('cardPos').textContent = word.pos;
+  document.getElementById('cardPronunciation').textContent = word.pronunciation;
+  document.getElementById('cardNumber').textContent = `${currentIndex + 1} / ${sessionQueue.length}`;
+
+  // Back
+  document.getElementById('cardWordBack').textContent = word.word;
+  document.getElementById('cardDefinition').textContent = word.definition;
+  document.getElementById('cardExample').textContent = word.example ? `"${word.example}"` : '';
+  document.getElementById('cardNumberBack').textContent = `${currentIndex + 1} / ${sessionQueue.length}`;
+
+  // Mastery badges
+  const masteryClass = ws.status === 'known' ? 'mastery-known' : ws.status === 'learning' ? 'mastery-learning' : 'mastery-new';
+  const masteryText = ws.status === 'known' ? 'Known' : ws.status === 'learning' ? 'Learning' : 'New';
+  ['cardMastery', 'cardMasteryBack'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'card-mastery ' + masteryClass;
+    el.textContent = masteryText;
+  });
+
+  // Progress
+  const progress = sessionQueue.length > 0 ? ((currentIndex + 1) / sessionQueue.length * 100) : 0;
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('progressText').textContent = `${currentIndex + 1} / ${sessionQueue.length}`;
+
+  // Prev button
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+
+  updateStats();
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+let preferredVoice = null;
+function loadVoice() {
+  const voices = speechSynthesis.getVoices();
+  preferredVoice = voices.find(v => v.name.includes('Google US English'))
+    || voices.find(v => v.name.includes('Google UK English'))
+    || voices.find(v => /english/i.test(v.name) && v.lang.startsWith('en'));
+}
+speechSynthesis.onvoiceschanged = loadVoice;
+loadVoice();
+
+function speakWord() {
+  if (sessionQueue.length === 0) return;
+  speechSynthesis.cancel();
+  const word = sessionQueue[currentIndex].word;
+  const utterance = new SpeechSynthesisUtterance(word);
+  if (preferredVoice) utterance.voice = preferredVoice;
+  utterance.rate = 0.85;
+  utterance.pitch = 1;
+  const btn = document.getElementById('speakBtn');
+  btn.classList.add('speaking');
+  utterance.onend = () => btn.classList.remove('speaking');
+  utterance.onerror = () => btn.classList.remove('speaking');
+  speechSynthesis.speak(utterance);
+}
+
+function markWord(status) {
+  if (sessionQueue.length === 0) return;
+  const word = sessionQueue[currentIndex];
+  setWordState(word.word, status);
+  updateStreak();
+  nextCard();
+}
+
+function nextCard() {
+  if (currentIndex < sessionQueue.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    currentIndex = 0;
+    renderCard();
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderCard();
+  }
+}
+
+function skipCard() {
+  nextCard();
+}
+
+function updateStats() {
+  let known = 0, learning = 0, newCount = 0;
+  VOCAB.forEach(w => {
+    const s = getWordState(w.word).status;
+    if (s === 'known') known++;
+    else if (s === 'learning') learning++;
+    else newCount++;
+  });
+
+  document.getElementById('knownCount').textContent = known;
+  document.getElementById('learningCount').textContent = learning;
+  document.getElementById('remainingCount').textContent = newCount;
+
+  // Stats view
+  document.getElementById('statsKnown').textContent = known;
+  document.getElementById('statsLearning').textContent = learning;
+  document.getElementById('statsNew').textContent = newCount;
+  document.getElementById('statsSessions').textContent = state.sessions;
+  document.getElementById('streakNumber').textContent = state.streak;
+}
+
+// View switching
+function switchView(view) {
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('cardView').classList.toggle('active', view === 'card');
+  document.getElementById('listView').classList.toggle('active', view === 'list');
+  document.getElementById('statsView').classList.toggle('active', view === 'stats');
+  if (view === 'list') renderList();
+  if (view === 'stats') updateStats();
+}
+
+// List view
+function renderList() {
+  const list = document.getElementById('wordList');
+  let filtered = VOCAB.filter(w => {
+    const s = getWordState(w.word).status;
+    if (listFilter !== 'all' && s !== listFilter) return false;
+    if (searchTerm && !w.word.toLowerCase().includes(searchTerm.toLowerCase()) && !w.definition.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    return true;
+  });
+
+  list.innerHTML = filtered.map(w => {
+    const s = getWordState(w.word).status;
+    const badgeClass = s === 'known' ? 'mastery-known' : s === 'learning' ? 'mastery-learning' : 'mastery-new';
+    const badgeText = s === 'known' ? 'Known' : s === 'learning' ? 'Learning' : 'New';
+    return `<li class="word-item" onclick="jumpToWord('${w.word}')">
+      <div class="word-item-left">
+        <span class="word-item-word">${w.word}</span>
+        <span class="word-item-pos">${w.pos}</span>
+        <span class="word-item-badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <span class="word-item-def">${w.definition.substring(0, 60)}${w.definition.length > 60 ? '…' : ''}</span>
+    </li>`;
+  }).join('');
+}
+
+function filterList(term) {
+  searchTerm = term;
+  renderList();
+}
+
+function setListFilter(filter) {
+  listFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderList();
+}
+
+function jumpToWord(word) {
+  sessionMode = 'all';
+  buildQueue();
+  const idx = sessionQueue.findIndex(w => w.word === word);
+  if (idx >= 0) currentIndex = idx;
+  switchViewDirect('card');
+  renderCard();
+}
+
+function switchViewDirect(view) {
+  document.querySelectorAll('.nav button').forEach((b, i) => {
+    b.classList.toggle('active', (view === 'card' && i === 0) || (view === 'list' && i === 1) || (view === 'stats' && i === 2));
+  });
+  document.getElementById('cardView').classList.toggle('active', view === 'card');
+  document.getElementById('listView').classList.toggle('active', view === 'list');
+  document.getElementById('statsView').classList.toggle('active', view === 'stats');
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    state = defaultState();
+    saveState();
+    buildQueue();
+    renderCard();
+    updateStats();
+  }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  switch(e.key) {
+    case ' ':
+      e.preventDefault();
+      flipCard();
+      break;
+    case 'ArrowRight':
+      e.preventDefault();
+      nextCard();
+      break;
+    case 'ArrowLeft':
+      e.preventDefault();
+      prevCard();
+      break;
+    case '1':
+      markWord('learning');
+      break;
+    case '2':
+      markWord('known');
+      break;
+    case 's':
+    case 'S':
+      speakWord();
+      break;
+  }
+});
+
+// Init
+buildQueue();
+renderCard();
+updateStats();
+</script>
+
+</body>
+</html>
