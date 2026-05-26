@@ -47,6 +47,28 @@ def load_words(xlsx_path):
         })
     return words
 
+def load_pdf_words(json_path, existing_words):
+    """Load words extracted from handwritten PDF scans, skipping duplicates."""
+    if not json_path.exists():
+        return []
+    with open(json_path, 'r', encoding='utf-8') as f:
+        pdf_words = json.load(f)
+    existing_lower = set(w['word'].strip().lower() for w in existing_words)
+    new_words = []
+    seen = set()
+    for w in pdf_words:
+        key = w['word'].strip().lower()
+        if key not in existing_lower and key not in seen:
+            new_words.append({
+                'word': w['word'].strip(),
+                'pos': w.get('pos', ''),
+                'pronunciation': '',
+                'definition': w.get('definition', ''),
+                'example': '',
+            })
+            seen.add(key)
+    return new_words
+
 def build_html(words, template_path, output_path):
     template = template_path.read_text(encoding='utf-8')
     # Find and replace the VOCAB array
@@ -82,7 +104,14 @@ def main():
 
     print(f"Reading words from: {xlsx_path}")
     words = load_words(xlsx_path)
-    print(f"Found {len(words)} words")
+    print(f"Found {len(words)} words from Excel")
+
+    pdf_json = base / 'data' / 'pdf_words.json'
+    pdf_words = load_pdf_words(pdf_json, words)
+    if pdf_words:
+        words.extend(pdf_words)
+        print(f"Added {len(pdf_words)} new words from PDF scans")
+    print(f"Total: {len(words)} words")
 
     count = build_html(words, template_path, output_path)
     print(f"Built {output_path} with {count} words")
