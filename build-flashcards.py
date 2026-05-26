@@ -64,7 +64,7 @@ def load_pdf_words(json_path, existing_words):
                 'pos': w.get('pos', ''),
                 'pronunciation': '',
                 'definition': w.get('definition', ''),
-                'example': '',
+                'example': w.get('example', ''),
             })
             seen.add(key)
     return new_words
