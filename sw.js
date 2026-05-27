@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lexicon-v1';
+const CACHE_NAME = 'lexicon-v2';
 const ASSETS = [
   '.',
   'index.html',
@@ -23,7 +23,20 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
+  const req = e.request;
+  const isHTML = req.mode === 'navigate' ||
+    (req.method === 'GET' && (req.headers.get('accept') || '').includes('text/html'));
+  if (isHTML) {
+    // Network-first for the page so content updates show up immediately.
+    e.respondWith(
+      fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(c => c.put(req, copy));
+        return res;
+      }).catch(() => caches.match(req).then(c => c || caches.match('index.html')))
+    );
+    return;
+  }
+  // Cache-first for other static assets.
+  e.respondWith(caches.match(req).then(cached => cached || fetch(req)));
 });
