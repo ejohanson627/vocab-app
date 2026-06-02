@@ -95,7 +95,7 @@ if ('serviceWorker' in navigator) {
   .lex-screen {
     flex: 1; min-height: 0; min-width: 0;
     display: none; flex-direction: column;
-    padding: 62px 20px 0;
+    padding: calc(env(safe-area-inset-top) + 12px) 20px 0;
   }
   .lex-screen.on { display: flex; }
 
@@ -135,7 +135,7 @@ if ('serviceWorker' in navigator) {
   .lex-stats .dot { width: 3px; height: 3px; border-radius: 99px; background: var(--muted); opacity: .5; }
 
   /* ── Study: chips ──────────────────────────────────────────── */
-  .lex-chips { display: flex; gap: 8px; padding: 4px 0 14px; }
+  .lex-chips { display: flex; gap: 8px; padding: 4px 0 10px; }
   .lex-chip {
     padding: 9px 15px; border-radius: 99px;
     border: 1px solid var(--line); background: transparent; color: var(--ink2);
@@ -150,7 +150,7 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ── Study: card ───────────────────────────────────────────── */
-  .lex-cardarea { flex: 1; min-height: 0; display: flex; padding: 2px 0 4px; }
+  .lex-cardarea { flex: 1; min-height: 0; display: flex; padding: 0 0 2px; }
   .lex-card-wrap { flex: 1; perspective: 1600px; cursor: pointer; }
   .lex-card {
     position: relative; width: 100%; height: 100%;
@@ -366,7 +366,7 @@ if ('serviceWorker' in navigator) {
   /* ── Tab bar ───────────────────────────────────────────────── */
   .lex-tabbar {
     display: flex; align-items: flex-start; justify-content: space-around;
-    padding: 11px 8px calc(26px + env(safe-area-inset-bottom));
+    padding: 10px 8px calc(12px + env(safe-area-inset-bottom));
     background: var(--glass);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
@@ -416,8 +416,8 @@ if ('serviceWorker' in navigator) {
         </div>
 
         <div class="lex-chips" id="filterChips">
-          <button class="lex-chip on" data-filter="all">All Words</button>
-          <button class="lex-chip" data-filter="new">New Only</button>
+          <button class="lex-chip on" data-filter="all">All</button>
+          <button class="lex-chip" data-filter="new">New</button>
           <button class="lex-chip" data-filter="learning">Learning</button>
           <button class="lex-chip lex-chip-icon" id="shuffleBtn" aria-label="Shuffle"></button>
         </div>
