@@ -2,757 +2,548 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Lexicon</title>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lexicon">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#FAFAF7">
+<meta name="theme-color" content="#F5F2E8" id="themeColorMeta">
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
 </script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Work+Sans:wght@400;500;600&display=swap');
 
-  :root {
-    --bg: #FAFAF7;
-    --card-bg: #FFFFFF;
-    --text-primary: #1A1A1A;
-    --text-secondary: #6B6B6B;
-    --text-tertiary: #9A9A9A;
-    --accent: #2D2D2D;
-    --accent-light: #E8E8E4;
-    --border: #E5E5E0;
-    --success: #4A7C59;
-    --success-light: #EDF5EF;
-    --warning: #8B6914;
-    --warning-light: #FDF8EC;
-    --error: #9B3B3B;
-    --error-light: #FAEFEF;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
-    --radius: 12px;
-    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
+  /* ── Reset ─────────────────────────────────────────────────── */
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
+  html, body { height: 100%; }
   body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
+    background: #F5F2E8;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  body.is-dusk { background: #1B1916; }
+
+  /* The app fills the viewport; on wide screens it's a centered phone column. */
+  #root {
+    height: 100dvh;
+    display: flex; justify-content: center;
+    background: var(--bg, #F5F2E8);
+  }
+  @media (min-width: 560px) {
+    #root { padding: 24px 0; background: #2b2824; }
+    .lex-app { max-width: 420px; border-radius: 30px; overflow: hidden;
+      box-shadow: 0 30px 80px -20px rgba(0,0,0,0.55); }
   }
 
-  .app {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 40px 24px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  /* ── Theme tokens (base = Manuscript) ─────────────────────── */
+  .lex-app {
+    --tint: 34,31,24;
+    --bg: #F5F2E8;
+    --ink: #221F18;
+    --ink2: #5b554a;
+    --muted: #9b958a;
+    --card: #FFFFFF;
+    --gold: #C8A02A;
+    --amber: #97681A;  --amber-rgb: 151,104,26;
+    --green: #3C6B52;  --green-rgb: 60,107,82;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'Work Sans', -apple-system, system-ui, sans-serif;
+    --radius: 26px;
+    --card-border: rgba(var(--tint), 0.05);
+    --card-shadow: 0 1px 2px rgba(var(--tint),0.04), 0 18px 40px -22px rgba(var(--tint),0.28);
+    --glass: rgba(245,242,232,0.82);
+    --chip-on-bg: var(--ink);
+    --chip-on-fg: var(--bg);
+    --line: rgba(var(--tint), 0.10);
+    --line-soft: rgba(var(--tint), 0.06);
   }
 
-  /* Header */
-  .header {
-    text-align: center;
-    margin-bottom: 40px;
+  /* Dusk — dark, warm espresso, antique gold, night reading */
+  .lex-app.t-dusk {
+    --tint: 236,229,214;
+    --bg: #1B1916;
+    --ink: #ECE5D6;
+    --ink2: #a59e8d;
+    --muted: #7c7567;
+    --card: #262320;
+    --gold: #D4AF37;
+    --amber: #CDA15A;  --amber-rgb: 205,161,90;
+    --green: #82B59A;  --green-rgb: 130,181,154;
+    --radius: 26px;
+    --card-border: rgba(var(--tint), 0.09);
+    --card-shadow: 0 24px 48px -26px rgba(0,0,0,0.7);
+    --glass: rgba(27,25,22,0.8);
   }
 
-  .header h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300;
-    font-size: 2.4rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .header .subtitle {
-    font-size: 0.72rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    font-weight: 400;
-  }
-
-  /* Navigation */
-  .nav {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    margin-bottom: 32px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 4px;
-  }
-
-  .nav button {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 400;
-    letter-spacing: 0.03em;
-    padding: 8px 20px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: 8px;
-    transition: var(--transition);
-  }
-
-  .nav button.active {
-    background: var(--accent);
-    color: #fff;
-    font-weight: 500;
-  }
-
-  .nav button:hover:not(.active) {
-    background: var(--accent-light);
-    color: var(--text-primary);
-  }
-
-  /* Stats Bar */
-  .stats-bar {
-    display: flex;
-    justify-content: center;
-    gap: 32px;
-    margin-bottom: 28px;
-    padding: 16px 0;
-  }
-
-  .stat {
-    text-align: center;
-  }
-
-  .stat-value {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.6rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-top: 4px;
-  }
-
-  /* Flashcard */
-  .card-container {
-    perspective: 1200px;
-    margin-bottom: 28px;
-    flex-shrink: 0;
-  }
-
-  .flashcard {
+  /* ── App shell ─────────────────────────────────────────────── */
+  .lex-app {
+    flex: 1; min-width: 0;
+    height: 100%; width: 100%; overflow: hidden;
+    display: flex; flex-direction: column;
+    background: var(--bg); color: var(--ink);
     position: relative;
-    width: 100%;
-    min-height: 320px;
-    cursor: pointer;
-    transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: var(--sans);
+  }
+  .lex-app button { font-family: var(--sans); cursor: pointer; border: none; background: none; color: inherit; }
+  .lex-body { flex: 1; min-height: 0; min-width: 0; display: flex; }
+  .lex-screen {
+    flex: 1; min-height: 0; min-width: 0;
+    display: none; flex-direction: column;
+    padding: 62px 20px 0;
+  }
+  .lex-screen.on { display: flex; }
+
+  /* ── Study: header ─────────────────────────────────────────── */
+  .lex-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 6px 2px 10px;
+  }
+  .lex-wordmark {
+    font-family: var(--serif); font-weight: 600;
+    font-size: 26px; letter-spacing: 0.22em; color: var(--ink);
+    padding-left: 0.22em;
+  }
+  .lex-deckpos {
+    font-family: var(--serif); font-size: 18px; color: var(--muted);
+    font-feature-settings: "onum" 1; letter-spacing: 0.02em;
+  }
+  .lex-deckpos span { opacity: 0.55; }
+
+  /* ── Study: progress strip ─────────────────────────────────── */
+  .lex-progress { padding: 4px 2px 12px; }
+  .lex-bar {
+    height: 6px; border-radius: 99px; background: rgba(var(--tint),0.07);
+    display: flex; overflow: hidden;
+  }
+  .lex-bar-known { background: var(--green); transition: width .5s ease; }
+  .lex-bar-learning { background: var(--amber); opacity: .8; transition: width .5s ease; }
+  .lex-stats {
+    display: flex; align-items: center; gap: 9px; margin-top: 9px;
+    font-size: 12px; letter-spacing: 0.04em; color: var(--ink2);
+    text-transform: lowercase;
+  }
+  .lex-stats b {
+    font-family: var(--serif); font-weight: 600; font-size: 15px;
+    font-feature-settings: "onum" 1; color: var(--ink); margin-right: 2px;
+  }
+  .lex-stats .dot { width: 3px; height: 3px; border-radius: 99px; background: var(--muted); opacity: .5; }
+
+  /* ── Study: chips ──────────────────────────────────────────── */
+  .lex-chips { display: flex; gap: 8px; padding: 4px 0 14px; }
+  .lex-chip {
+    padding: 9px 15px; border-radius: 99px;
+    border: 1px solid var(--line); background: transparent; color: var(--ink2);
+    font-size: 13px; font-weight: 500; letter-spacing: 0.01em;
+    transition: all .18s ease; white-space: nowrap;
+  }
+  .lex-chip:active { transform: scale(0.96); }
+  .lex-chip.on { background: var(--chip-on-bg); color: var(--chip-on-fg); border-color: var(--chip-on-bg); }
+  .lex-chip-icon {
+    margin-left: auto; width: 40px; padding: 0;
+    display: flex; align-items: center; justify-content: center; color: var(--ink2);
   }
 
-  .flashcard.flipped {
-    transform: rotateY(180deg);
+  /* ── Study: card ───────────────────────────────────────────── */
+  .lex-cardarea { flex: 1; min-height: 0; display: flex; padding: 2px 0 4px; }
+  .lex-card-wrap { flex: 1; perspective: 1600px; cursor: pointer; }
+  .lex-card {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d; transition: transform .55s cubic-bezier(.4,.05,.2,1);
+  }
+  .lex-card.is-flipped { transform: rotateY(180deg); }
+  .lex-face {
+    position: absolute; inset: 0;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--card-shadow); border: 1px solid var(--card-border);
+    display: flex; flex-direction: column; padding: 20px 22px 18px;
+  }
+  .lex-back { transform: rotateY(180deg); }
+  .lex-card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .lex-badge {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; padding: 5px 10px; border-radius: 99px;
+  }
+  .lex-back-word {
+    font-family: var(--serif); font-style: italic; font-size: 20px;
+    color: var(--muted); font-weight: 500;
+  }
+  .lex-card-body {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; gap: 6px;
+  }
+  .lex-word {
+    font-family: var(--serif); font-weight: 500; font-size: 46px;
+    line-height: 1.04; color: var(--ink); letter-spacing: 0.005em;
+  }
+  .lex-pos { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--muted); }
+  .lex-pron { font-size: 13px; color: var(--muted); letter-spacing: 0.02em; margin-top: 2px; }
+  .lex-back-body { gap: 16px; padding: 6px 4px; }
+  .lex-def {
+    font-family: var(--serif); font-size: 27px; line-height: 1.22;
+    color: var(--ink); font-weight: 500; text-wrap: pretty;
+  }
+  .lex-rule { width: 46px; height: 1px; background: var(--line); }
+  .lex-example {
+    font-family: var(--serif); font-style: italic; font-size: 20px;
+    line-height: 1.34; color: var(--ink2); text-wrap: pretty;
+  }
+  .lex-card-foot { display: flex; align-items: center; justify-content: space-between; }
+  .lex-speak {
+    width: 38px; height: 38px; border-radius: 99px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink2); background: rgba(var(--tint),0.045); transition: all .18s ease;
+  }
+  .lex-speak:active { transform: scale(0.9); background: rgba(var(--tint),0.09); }
+  .lex-speak.speaking { color: var(--green); background: rgba(var(--green-rgb),0.12); }
+  .lex-hint {
+    font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
   }
 
-  .card-face {
-    position: absolute;
-    inset: 0;
-    backface-visibility: hidden;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 40px;
-    text-align: center;
+  /* ── Star ──────────────────────────────────────────────────── */
+  .lex-star {
+    color: var(--muted); padding: 4px; margin: -4px -4px 0 0;
+    display: flex; transition: color .2s ease, transform .2s ease; position: relative;
+  }
+  .lex-star.on { color: var(--gold); }
+  .lex-star:active { transform: scale(0.85); }
+  .lex-star.sm { padding: 6px; margin: 0; }
+  .lex-star.pop { animation: starpop .5s cubic-bezier(.3,1.4,.5,1); }
+  @keyframes starpop {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.35) rotate(-8deg); }
+    60% { transform: scale(0.92) rotate(4deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .lex-star.pop::after {
+    content: ''; position: absolute; inset: -6px; border-radius: 99px;
+    border: 2px solid var(--gold); animation: starring .5s ease-out forwards;
+  }
+  @keyframes starring {
+    0% { transform: scale(0.5); opacity: .7; }
+    100% { transform: scale(1.7); opacity: 0; }
   }
 
-  .card-back {
-    transform: rotateY(180deg);
+  /* ── Study: actions ────────────────────────────────────────── */
+  .lex-actions { display: flex; gap: 12px; padding: 4px 0 0; }
+  .lex-act {
+    flex: 1; padding: 17px 0; border-radius: 16px;
+    font-size: 16px; font-weight: 600; letter-spacing: 0.01em;
+    background: var(--card); border: 1.5px solid; transition: all .15s ease;
+  }
+  .lex-act:active { transform: scale(0.97); }
+  .lex-act.learning { color: var(--amber); border-color: rgba(var(--amber-rgb),0.45); }
+  .lex-act.learning:active { background: rgba(var(--amber-rgb),0.08); }
+  .lex-act.known { color: var(--green); border-color: rgba(var(--green-rgb),0.45); }
+  .lex-act.known:active { background: rgba(var(--green-rgb),0.08); }
+  .lex-nav { display: flex; justify-content: center; gap: 36px; padding: 13px 0 12px; }
+  .lex-nav button {
+    display: flex; align-items: center; gap: 7px; color: var(--muted);
+    font-size: 13px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .lex-nav button:active { color: var(--ink); }
+  .lex-nav button:disabled { opacity: 0.35; }
+
+  /* ── List screens (Browse / Fav / Progress) ────────────────── */
+  .lex-list-screen { padding-top: 60px; }
+  .lex-page-head { padding: 8px 4px 14px; }
+  .lex-page-head h1 {
+    font-family: var(--serif); font-weight: 600; font-size: 38px;
+    margin: 0; color: var(--ink); letter-spacing: 0.01em;
+  }
+  .lex-page-head p {
+    margin: 3px 0 0; font-size: 13px; color: var(--muted);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .lex-searchbar {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(var(--tint),0.045); border-radius: 13px;
+    padding: 11px 14px; margin-bottom: 6px;
+  }
+  .lex-search-ico { color: var(--muted); display: flex; }
+  .lex-searchbar input {
+    flex: 1; border: none; background: none; outline: none;
+    font-family: var(--sans); font-size: 15px; color: var(--ink);
+  }
+  .lex-searchbar input::placeholder { color: var(--muted); }
+  .lex-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 0 16px; }
+  .lex-scroll::-webkit-scrollbar { width: 0; }
+
+  .lex-row {
+    display: flex; align-items: center; gap: 13px;
+    padding: 15px 6px; border-bottom: 1px solid var(--line-soft);
+    cursor: pointer; transition: background .15s ease;
+  }
+  .lex-row:active { background: rgba(var(--tint),0.03); }
+  .lex-row-dot { width: 8px; height: 8px; border-radius: 99px; flex-shrink: 0; }
+  .lex-row-main { flex: 1; min-width: 0; }
+  .lex-row-word {
+    font-family: var(--serif); font-weight: 600; font-size: 22px; color: var(--ink); line-height: 1.1;
+  }
+  .lex-row-def {
+    font-size: 13px; color: var(--ink2); margin-top: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .lex-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
+
+  .lex-fav-empty {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding-bottom: 60px;
+  }
+  .lex-fav-star { color: var(--gold); opacity: .5; margin-bottom: 16px; }
+  .lex-fav-empty-t { font-family: var(--serif); font-size: 26px; color: var(--ink); }
+  .lex-fav-empty-s { font-size: 14px; color: var(--muted); margin-top: 6px; max-width: 220px; line-height: 1.4; }
+
+  /* ── Progress ──────────────────────────────────────────────── */
+  .lex-progress-scroll { display: flex; flex-direction: column; align-items: center; }
+  .lex-ring-wrap { position: relative; margin: 20px 0 14px; }
+  .lex-ring-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .lex-ring-pct {
+    font-family: var(--serif); font-weight: 600; font-size: 52px; color: var(--ink);
+    font-feature-settings: "onum" 1; line-height: 1;
+  }
+  .lex-ring-pct span { font-size: 26px; color: var(--muted); }
+  .lex-ring-sub {
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted); margin-top: 4px;
+  }
+  .lex-pstats { display: flex; align-items: center; justify-content: center; width: 100%; padding: 20px 0; gap: 4px; }
+  .lex-pstat { flex: 1; text-align: center; }
+  .lex-pstat-n {
+    font-family: var(--serif); font-weight: 600; font-size: 40px;
+    font-feature-settings: "onum" 1; line-height: 1;
+  }
+  .lex-pstat-l {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); margin-top: 6px;
+  }
+  .lex-pdiv { width: 1px; height: 40px; background: var(--line); }
+  .lex-streak {
+    width: 100%; background: var(--card); border-radius: 18px;
+    border: 1px solid var(--card-border); box-shadow: var(--card-shadow);
+    padding: 4px 18px; margin-top: 8px;
+  }
+  .lex-streak-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 15px 0; border-bottom: 1px solid var(--line-soft);
+    font-size: 15px; color: var(--ink2);
+  }
+  .lex-streak-row:last-child { border-bottom: none; }
+  .lex-streak-row b {
+    font-family: var(--serif); font-weight: 600; font-size: 19px; color: var(--ink);
+    font-feature-settings: "onum" 1; white-space: nowrap; padding-left: 16px;
   }
 
-  .card-word {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.6rem;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    color: var(--text-primary);
-    margin-bottom: 8px;
+  /* ── Appearance toggle (Progress) ──────────────────────────── */
+  .lex-appearance { width: 100%; margin-top: 20px; }
+  .lex-appearance-label {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); padding: 0 4px 9px;
+  }
+  .lex-seg {
+    display: flex; gap: 4px; padding: 4px;
+    background: rgba(var(--tint),0.05); border-radius: 14px;
+  }
+  .lex-seg-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 12px 0; border-radius: 10px; color: var(--ink2);
+    font-size: 14px; font-weight: 500; transition: all .2s ease;
+  }
+  .lex-seg-btn.on {
+    background: var(--card); color: var(--ink);
+    box-shadow: 0 1px 2px rgba(var(--tint),0.06), 0 6px 16px -10px rgba(var(--tint),0.4);
   }
 
-  .card-pos {
-    font-size: 0.72rem;
-    font-style: italic;
-    color: var(--text-tertiary);
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
+  /* ── Tab bar ───────────────────────────────────────────────── */
+  .lex-tabbar {
+    display: flex; align-items: flex-start; justify-content: space-around;
+    padding: 11px 8px calc(26px + env(safe-area-inset-bottom));
+    background: var(--glass);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border-top: 1px solid var(--line-soft); flex-shrink: 0;
   }
-
-  .card-pronunciation {
-    font-size: 0.78rem;
-    color: var(--text-tertiary);
-    font-style: italic;
+  .lex-tab {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--muted); flex: 1; transition: color .18s ease; padding: 2px 0;
   }
-
-  .card-hint {
-    font-size: 0.7rem;
-    color: var(--text-tertiary);
-    margin-top: 24px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .card-definition {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem;
-    font-weight: 400;
-    line-height: 1.65;
-    color: var(--text-primary);
-    margin-bottom: 20px;
-  }
-
-  .card-example {
-    font-size: 0.82rem;
-    font-style: italic;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    max-width: 90%;
-    border-top: 1px solid var(--border);
-    padding-top: 16px;
-  }
-
-  .card-number {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    font-size: 0.68rem;
-    color: var(--text-tertiary);
-    letter-spacing: 0.05em;
-  }
-
-  .speak-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    color: var(--text-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    margin-top: 12px;
-  }
-
-  .speak-btn:hover {
-    border-color: var(--accent);
-    color: var(--text-primary);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .speak-btn.speaking {
-    border-color: var(--accent);
-    color: var(--text-primary);
-    animation: pulse-ring 1s ease-in-out infinite;
-  }
-
-  @keyframes pulse-ring {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(45,45,45,0.1); }
-    50% { box-shadow: 0 0 0 6px rgba(45,45,45,0); }
-  }
-
-  .card-mastery {
-    position: absolute;
-    top: 16px;
-    left: 20px;
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 500;
-  }
-
-  .mastery-new { background: var(--accent-light); color: var(--text-secondary); }
-  .mastery-learning { background: var(--warning-light); color: var(--warning); }
-  .mastery-known { background: var(--success-light); color: var(--success); }
-
-  /* Controls */
-  .controls {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .btn {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 400;
-    letter-spacing: 0.03em;
-    padding: 12px 28px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    color: var(--text-secondary);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .btn:hover {
-    border-color: var(--accent);
-    color: var(--text-primary);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .btn-know {
-    border-color: var(--success);
-    color: var(--success);
-  }
-
-  .btn-know:hover {
-    background: var(--success-light);
-    border-color: var(--success);
-  }
-
-  .btn-unsure {
-    border-color: var(--warning);
-    color: var(--warning);
-  }
-
-  .btn-unsure:hover {
-    background: var(--warning-light);
-  }
-
-  .btn-skip {
-    border-color: var(--border);
-    color: var(--text-tertiary);
-  }
-
-  .nav-controls {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-top: 8px;
-  }
-
-  .nav-btn {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.72rem;
-    background: none;
-    border: none;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    padding: 8px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    transition: var(--transition);
-  }
-
-  .nav-btn:hover { color: var(--text-primary); }
-  .nav-btn:disabled { opacity: 0.3; cursor: default; }
-
-  /* Progress Bar */
-  .progress-container {
-    margin-bottom: 28px;
-  }
-
-  .progress-bar {
-    height: 2px;
-    background: var(--accent-light);
-    border-radius: 1px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    transition: width 0.5s ease;
-    border-radius: 1px;
-  }
-
-  .progress-text {
-    text-align: center;
-    font-size: 0.68rem;
-    color: var(--text-tertiary);
-    margin-top: 6px;
-    letter-spacing: 0.05em;
-  }
-
-  /* List View */
-  .list-view {
-    display: none;
-  }
-
-  .list-view.active { display: block; }
-  .card-view.active { display: block; }
-  .card-view { display: none; }
-  .stats-view { display: none; }
-  .stats-view.active { display: block; }
-
-  .filter-bar {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.05em;
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-secondary);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .filter-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-
-  .search-box {
-    width: 100%;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card-bg);
-    color: var(--text-primary);
-    outline: none;
-    margin-bottom: 16px;
-    transition: var(--transition);
-  }
-
-  .search-box:focus {
-    border-color: var(--accent);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .search-box::placeholder { color: var(--text-tertiary); }
-
-  .word-list {
-    list-style: none;
-  }
-
-  .word-item {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .word-item:hover { padding-left: 8px; }
-
-  .word-item-left {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-  }
-
-  .word-item-word {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: var(--text-primary);
-  }
-
-  .word-item-pos {
-    font-size: 0.7rem;
-    font-style: italic;
-    color: var(--text-tertiary);
-  }
-
-  .word-item-def {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    max-width: 55%;
-    text-align: right;
-    line-height: 1.4;
-  }
-
-  .word-item-badge {
-    font-size: 0.55rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  /* Stats View */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .stats-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    text-align: center;
-  }
-
-  .stats-card .stat-value {
-    font-size: 2rem;
-  }
-
-  .streak-display {
-    text-align: center;
-    margin-bottom: 32px;
-    padding: 32px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-
-  .streak-number {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 3.5rem;
-    font-weight: 300;
-    color: var(--text-primary);
-    line-height: 1;
-  }
-
-  .reset-btn {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.72rem;
-    padding: 10px 24px;
-    border: 1px solid var(--error);
-    background: transparent;
-    color: var(--error);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    margin-top: 24px;
-  }
-
-  .reset-btn:hover {
-    background: var(--error-light);
-  }
-
-  /* Session Mode Selector */
-  .session-options {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .session-btn {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.72rem;
-    letter-spacing: 0.05em;
-    padding: 8px 16px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    color: var(--text-secondary);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .session-btn.active {
-    border-color: var(--accent);
-    color: var(--text-primary);
-    background: var(--accent-light);
-  }
-
-  /* Keyboard hints */
-  .keyboard-hints {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 0.65rem;
-    color: var(--text-tertiary);
-    letter-spacing: 0.05em;
-  }
-
-  .keyboard-hints kbd {
-    display: inline-block;
-    padding: 2px 6px;
-    background: var(--accent-light);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.6rem;
-    margin: 0 2px;
-  }
-
-  /* Responsive */
-  @media (max-width: 480px) {
-    .app { padding: 24px 16px; }
-    .card-word { font-size: 2rem; }
-    .card-face { padding: 36px 24px; }
-    .stats-bar { gap: 20px; }
-    .word-item-def { max-width: 45%; }
+  .lex-tab.on { color: var(--ink); }
+  .lex-tab-ico { position: relative; display: flex; height: 24px; align-items: center; }
+  .lex-tab-label { font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; }
+  .lex-tab-badge {
+    position: absolute; top: -4px; right: -9px;
+    min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px;
+    background: var(--gold); color: #fff; font-size: 10px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 2px var(--bg);
   }
 </style>
 </head>
 <body>
 
-<div class="app">
-  <div class="header">
-    <h1>Lexicon</h1>
-    <div class="subtitle">after David Foster Wallace</div>
-  </div>
+<div id="root">
+  <div class="lex-app t-manuscript" id="app">
+    <div class="lex-body">
 
-  <div class="nav">
-    <button class="active" onclick="switchView('card')">Study</button>
-    <button onclick="switchView('list')">Browse</button>
-    <button onclick="switchView('stats')">Progress</button>
-  </div>
+      <!-- ── STUDY ─────────────────────────────────────────── -->
+      <div class="lex-screen on" id="studyScreen">
+        <header class="lex-header">
+          <div class="lex-wordmark">LEXICON</div>
+          <div class="lex-deckpos"><span id="deckPos">1</span> <span>/</span> <span id="deckTotal">0</span></div>
+        </header>
 
-  <!-- CARD VIEW -->
-  <div class="card-view active" id="cardView">
-    <div class="stats-bar">
-      <div class="stat">
-        <div class="stat-value" id="knownCount">0</div>
-        <div class="stat-label">Known</div>
+        <div class="lex-progress">
+          <div class="lex-bar">
+            <div class="lex-bar-known" id="barKnown" style="width:0%"></div>
+            <div class="lex-bar-learning" id="barLearning" style="width:0%"></div>
+          </div>
+          <div class="lex-stats">
+            <span><b id="statKnown">0</b> known</span>
+            <span class="dot"></span>
+            <span><b id="statLearning">0</b> learning</span>
+            <span class="dot"></span>
+            <span><b id="statLeft">0</b> left</span>
+          </div>
+        </div>
+
+        <div class="lex-chips" id="filterChips">
+          <button class="lex-chip on" data-filter="all">All Words</button>
+          <button class="lex-chip" data-filter="new">New Only</button>
+          <button class="lex-chip" data-filter="learning">Learning</button>
+          <button class="lex-chip lex-chip-icon" id="shuffleBtn" aria-label="Shuffle"></button>
+        </div>
+
+        <div class="lex-cardarea">
+          <div class="lex-card-wrap" id="cardWrap">
+            <div class="lex-card" id="flashcard">
+              <!-- FRONT -->
+              <div class="lex-face lex-front">
+                <div class="lex-card-top">
+                  <span class="lex-badge" id="frontBadge">New</span>
+                  <button class="lex-star" id="frontStar" aria-label="Favorite"></button>
+                </div>
+                <div class="lex-card-body">
+                  <div class="lex-word" id="cardWord">—</div>
+                  <div class="lex-pos" id="cardPos"></div>
+                  <div class="lex-pron" id="cardPron"></div>
+                </div>
+                <div class="lex-card-foot">
+                  <button class="lex-speak" id="frontSpeak" aria-label="Pronounce"></button>
+                  <span class="lex-hint">Tap to reveal</span>
+                </div>
+              </div>
+              <!-- BACK -->
+              <div class="lex-face lex-back">
+                <div class="lex-card-top">
+                  <span class="lex-back-word" id="cardWordBack">—</span>
+                  <button class="lex-star" id="backStar" aria-label="Favorite"></button>
+                </div>
+                <div class="lex-card-body lex-back-body">
+                  <div class="lex-def" id="cardDef">—</div>
+                  <div class="lex-rule"></div>
+                  <div class="lex-example" id="cardExample"></div>
+                </div>
+                <div class="lex-card-foot">
+                  <button class="lex-speak" id="backSpeak" aria-label="Pronounce"></button>
+                  <span class="lex-hint">Tap to flip back</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lex-actions">
+          <button class="lex-act learning" id="markLearning">Still Learning</button>
+          <button class="lex-act known" id="markKnown">Know It</button>
+        </div>
+        <div class="lex-nav">
+          <button id="prevBtn"></button>
+          <button id="skipBtn"></button>
+        </div>
       </div>
-      <div class="stat">
-        <div class="stat-value" id="learningCount">0</div>
-        <div class="stat-label">Learning</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="remainingCount">0</div>
-        <div class="stat-label">Remaining</div>
-      </div>
-    </div>
 
-    <div class="session-options">
-      <button class="session-btn active" onclick="setSessionMode('all')">All Words</button>
-      <button class="session-btn" onclick="setSessionMode('new')">New Only</button>
-      <button class="session-btn" onclick="setSessionMode('learning')">Learning</button>
-      <button class="session-btn" onclick="setSessionMode('shuffle')">Shuffle</button>
-    </div>
-
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      <!-- ── BROWSE ────────────────────────────────────────── -->
+      <div class="lex-screen lex-list-screen" id="browseScreen">
+        <header class="lex-page-head">
+          <h1>Browse</h1>
+          <p><span id="browseCount">0</span> words in your session</p>
+        </header>
+        <div class="lex-searchbar">
+          <span class="lex-search-ico" id="searchIco"></span>
+          <input id="searchBox" placeholder="Search words or meanings" autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="lex-scroll" id="browseList"></div>
       </div>
-      <div class="progress-text" id="progressText">1 / 100</div>
-    </div>
 
-    <div class="card-container" onclick="flipCard()">
-      <div class="flashcard" id="flashcard">
-        <div class="card-face card-front">
-          <div class="card-mastery mastery-new" id="cardMastery">New</div>
-          <div class="card-number" id="cardNumber">1 / 100</div>
-          <div class="card-word" id="cardWord">—</div>
-          <div class="card-pos" id="cardPos"></div>
-          <div class="card-pronunciation" id="cardPronunciation"></div>
-          <button class="speak-btn" id="speakBtn" onclick="event.stopPropagation(); speakWord()" title="Pronounce word">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      <!-- ── FAVORITES ─────────────────────────────────────── -->
+      <div class="lex-screen lex-list-screen" id="favScreen">
+        <header class="lex-page-head">
+          <h1>Favorites</h1>
+          <p><span id="favCountLabel">0 words saved</span></p>
+        </header>
+        <div id="favBody"></div>
+      </div>
+
+      <!-- ── PROGRESS ──────────────────────────────────────── -->
+      <div class="lex-screen lex-list-screen" id="progressScreen">
+        <header class="lex-page-head">
+          <h1>Progress</h1>
+          <p>After David Foster Wallace</p>
+        </header>
+        <div class="lex-scroll lex-progress-scroll">
+          <div class="lex-ring-wrap">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="78" fill="none" style="stroke:rgba(var(--tint),0.09)" stroke-width="10"></circle>
+              <circle id="ringLearn" cx="100" cy="100" r="78" fill="none" style="stroke:var(--amber)" stroke-width="10"
+                stroke-linecap="round" transform="rotate(-90 100 100)" opacity="0.6"></circle>
+              <circle id="ringKnown" cx="100" cy="100" r="78" fill="none" style="stroke:var(--green)" stroke-width="10"
+                stroke-linecap="round" transform="rotate(-90 100 100)"></circle>
             </svg>
-          </button>
-          <div class="card-hint">tap to reveal</div>
+            <div class="lex-ring-center">
+              <div class="lex-ring-pct"><span id="ringPct">0</span><span>%</span></div>
+              <div class="lex-ring-sub">mastered</div>
+            </div>
+          </div>
+          <div class="lex-pstats">
+            <div class="lex-pstat"><div class="lex-pstat-n" id="pKnown" style="color:var(--green)">0</div><div class="lex-pstat-l">Known</div></div>
+            <div class="lex-pdiv"></div>
+            <div class="lex-pstat"><div class="lex-pstat-n" id="pLearning" style="color:var(--amber)">0</div><div class="lex-pstat-l">Learning</div></div>
+            <div class="lex-pdiv"></div>
+            <div class="lex-pstat"><div class="lex-pstat-n" id="pRemaining" style="color:var(--ink)">0</div><div class="lex-pstat-l">Remaining</div></div>
+          </div>
+          <div class="lex-streak">
+            <div class="lex-streak-row"><span>Current streak</span><b><span id="streakDays">0</span> days</b></div>
+            <div class="lex-streak-row"><span>Reviewed today</span><b><span id="reviewedToday">0</span> cards</b></div>
+            <div class="lex-streak-row"><span>Deck</span><b><span id="deckSize">0</span> words</b></div>
+          </div>
+          <div class="lex-appearance">
+            <div class="lex-appearance-label">Appearance</div>
+            <div class="lex-seg">
+              <button class="lex-seg-btn" id="segLight" data-theme="manuscript"></button>
+              <button class="lex-seg-btn" id="segDark" data-theme="dusk"></button>
+            </div>
+          </div>
         </div>
-        <div class="card-face card-back">
-          <div class="card-mastery mastery-new" id="cardMasteryBack">New</div>
-          <div class="card-number" id="cardNumberBack">1 / 100</div>
-          <div class="card-word" id="cardWordBack" style="font-size:1.6rem; margin-bottom:16px;">—</div>
-          <div class="card-definition" id="cardDefinition">—</div>
-          <div class="card-example" id="cardExample"></div>
-        </div>
       </div>
+
     </div>
 
-    <div class="controls">
-      <button class="btn btn-unsure" onclick="markWord('learning')">Still Learning</button>
-      <button class="btn btn-know" onclick="markWord('known')">Know It</button>
-    </div>
-
-    <div class="nav-controls">
-      <button class="nav-btn" id="prevBtn" onclick="prevCard()">&#8592; Prev</button>
-      <button class="nav-btn" onclick="skipCard()">Skip &#8594;</button>
-    </div>
-
-    <div class="keyboard-hints">
-      <kbd>Space</kbd> flip &nbsp; <kbd>&#8592;</kbd> prev &nbsp; <kbd>&#8594;</kbd> next &nbsp; <kbd>1</kbd> learning &nbsp; <kbd>2</kbd> known &nbsp; <kbd>S</kbd> speak
-    </div>
-  </div>
-
-  <!-- LIST VIEW -->
-  <div class="list-view" id="listView">
-    <input type="text" class="search-box" placeholder="Search words..." oninput="filterList(this.value)" id="searchBox">
-    <div class="filter-bar">
-      <button class="filter-btn active" onclick="setListFilter('all')">All</button>
-      <button class="filter-btn" onclick="setListFilter('new')">New</button>
-      <button class="filter-btn" onclick="setListFilter('learning')">Learning</button>
-      <button class="filter-btn" onclick="setListFilter('known')">Known</button>
-    </div>
-    <ul class="word-list" id="wordList"></ul>
-  </div>
-
-  <!-- STATS VIEW -->
-  <div class="stats-view" id="statsView">
-    <div class="streak-display">
-      <div class="stat-label" style="margin-bottom:8px">Current Streak</div>
-      <div class="streak-number" id="streakNumber">0</div>
-      <div class="stat-label" style="margin-top:4px">days</div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stats-card">
-        <div class="stat-value" id="statsKnown">0</div>
-        <div class="stat-label">Mastered</div>
-      </div>
-      <div class="stats-card">
-        <div class="stat-value" id="statsLearning">0</div>
-        <div class="stat-label">Learning</div>
-      </div>
-      <div class="stats-card">
-        <div class="stat-value" id="statsNew">0</div>
-        <div class="stat-label">Unseen</div>
-      </div>
-      <div class="stats-card">
-        <div class="stat-value" id="statsSessions">0</div>
-        <div class="stat-label">Sessions</div>
-      </div>
-    </div>
-
-    <div style="text-align:center">
-      <button class="reset-btn" onclick="resetProgress()">Reset All Progress</button>
-    </div>
+    <!-- ── TAB BAR ─────────────────────────────────────────── -->
+    <nav class="lex-tabbar" id="tabbar">
+      <button class="lex-tab on" data-tab="study"><span class="lex-tab-ico" id="tabIcoStudy"></span><span class="lex-tab-label">Study</span></button>
+      <button class="lex-tab" data-tab="browse"><span class="lex-tab-ico" id="tabIcoBrowse"></span><span class="lex-tab-label">Browse</span></button>
+      <button class="lex-tab" data-tab="fav"><span class="lex-tab-ico" id="tabIcoFav"></span><span class="lex-tab-label">Favorites</span></button>
+      <button class="lex-tab" data-tab="progress"><span class="lex-tab-ico" id="tabIcoProgress"></span><span class="lex-tab-label">Progress</span></button>
+    </nav>
   </div>
 </div>
 
@@ -13171,148 +12962,150 @@ const VOCAB = [
   }
 ];
 
-// State
-let state = loadState();
-let currentIndex = 0;
-let sessionQueue = [];
-let sessionMode = 'all';
-let listFilter = 'all';
-let searchTerm = '';
+// ── Icons (stroke-based, 24px grid) ───────────────────────────
+const Icon = {
+  star: (filled, size) => {
+    const s = size || 22;
+    return `<svg viewBox="0 0 24 24" width="${s}" height="${s}">
+      <path d="M12 3.2l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.99 6.8 19.2l.99-5.79-4.21-4.1 5.82-.85L12 3.2z"
+        fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5"
+        stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+  },
+  speaker: () => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8 8 0 010 12"/></svg>`,
+  shuffle: () => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+      stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h3.5c1.4 0 2.6.7 3.4 1.9M21 6h-4l1.5-1.5M21 6l-1.5 1.5"/>
+      <path d="M3 18h3.5c2.4 0 4.3-2 5.7-4.2C13.6 11.6 15.1 10 17.5 10H21M21 18h-4l1.5 1.5M21 18l-1.5-1.5"/></svg>`,
+  arrowL: () => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l-7 7 7 7"/></svg>`,
+  arrowR: () => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5l7 7-7 7"/></svg>`,
+  search: () => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+      stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/></svg>`,
+  sun: () => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+      stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/>
+      <path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4l1.4-1.4M18 6l1.4-1.4"/></svg>`,
+  moon: () => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+      stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4a6.5 6.5 0 1010.5 10.5z"/></svg>`,
+  tabStudy: (a) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+      stroke-width="${a ? 1.9 : 1.6}" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 5.5A2 2 0 016 4h5v15H6a2 2 0 01-2-2V5.5z" fill="${a ? 'currentColor' : 'none'}" fill-opacity="${a ? 0.12 : 0}"/>
+      <path d="M20 5.5A2 2 0 0018 4h-5v15h5a2 2 0 002-2V5.5z" fill="${a ? 'currentColor' : 'none'}" fill-opacity="${a ? 0.12 : 0}"/></svg>`,
+  tabBrowse: (a) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+      stroke-width="${a ? 1.9 : 1.6}" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>`,
+  tabFav: (a) => Icon.star(a, 23),
+  tabProgress: (a) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+      stroke-width="${a ? 1.9 : 1.6}" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19V5M4 19h16"/><path d="M8 19v-6M13 19V8M18 19v-9" fill="${a ? 'currentColor' : 'none'}" fill-opacity="${a ? 0.12 : 0}"/></svg>`,
+};
+
+const STATUS_META = {
+  new:      { label: 'New',      color: 'var(--muted)', bg: 'rgba(var(--tint),0.06)' },
+  learning: { label: 'Learning', color: 'var(--amber)', bg: 'rgba(var(--amber-rgb),0.12)' },
+  known:    { label: 'Known',    color: 'var(--green)', bg: 'rgba(var(--green-rgb),0.12)' },
+};
+
+// ── State ─────────────────────────────────────────────────────
+const LS_KEY = 'lexicon_state_v2';
+const DECK_TOTAL = VOCAB.length;
+const byWord = Object.fromEntries(VOCAB.map(w => [w.word, w]));
 
 function defaultState() {
   return {
-    words: {},
-    sessions: 0,
-    streak: 0,
-    lastDate: null,
-    firstUsed: new Date().toISOString()
+    words: {}, favs: [], order: null,
+    sessions: 0, streak: 0, lastDate: null,
+    reviewedToday: 0, reviewedDate: null,
+    appearance: null, firstUsed: new Date().toISOString(),
   };
 }
-
 function loadState() {
   try {
-    const saved = localStorage.getItem('lexicon_state');
-    if (saved) return JSON.parse(saved);
-  } catch(e) {}
+    const saved = JSON.parse(localStorage.getItem(LS_KEY));
+    if (saved && typeof saved === 'object') return Object.assign(defaultState(), saved);
+  } catch (e) {}
   return defaultState();
 }
+function saveState() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 
-function saveState() {
-  localStorage.setItem('lexicon_state', JSON.stringify(state));
+let state = loadState();
+
+// Resolve first-launch appearance from the OS preference.
+if (!state.appearance) {
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  state.appearance = prefersDark ? 'dusk' : 'manuscript';
 }
 
-function getWordState(word) {
-  return state.words[word] || { status: 'new', seen: 0, lastSeen: null };
-}
+// Transient UI state
+let tab = 'study';
+let filter = 'all';
+let flipped = false;
+let currentIndex = 0;
+let searchTerm = '';
+let favTimer = null;
 
-function setWordState(word, status) {
-  const ws = getWordState(word);
-  ws.status = status;
-  ws.seen = (ws.seen || 0) + 1;
-  ws.lastSeen = new Date().toISOString();
-  state.words[word] = ws;
+// ── Helpers ───────────────────────────────────────────────────
+function getStatus(word) { return (state.words[word] && state.words[word].status) || 'new'; }
+function setStatus(word, status) {
+  const ws = state.words[word] || { seen: 0, lastSeen: null };
+  ws.status = status; ws.seen = (ws.seen || 0) + 1; ws.lastSeen = new Date().toISOString();
+  state.words[word] = ws; saveState();
+}
+function isFav(word) { return state.favs.indexOf(word) !== -1; }
+function toggleFav(word) {
+  const i = state.favs.indexOf(word);
+  if (i === -1) state.favs.push(word); else state.favs.splice(i, 1);
   saveState();
 }
-
-function updateStreak() {
-  const today = new Date().toISOString().split('T')[0];
-  if (state.lastDate === today) return;
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  if (state.lastDate === yesterday) {
-    state.streak++;
-  } else if (state.lastDate !== today) {
-    state.streak = 1;
+function getOrder() {
+  if (!Array.isArray(state.order) || state.order.length !== VOCAB.length) {
+    state.order = VOCAB.map(w => w.word);
   }
-  state.lastDate = today;
-  state.sessions++;
-  saveState();
+  return state.order;
 }
-
-// Queue management
-function buildQueue() {
-  let pool;
-  switch(sessionMode) {
-    case 'new':
-      pool = VOCAB.filter(w => getWordState(w.word).status === 'new');
-      break;
-    case 'learning':
-      pool = VOCAB.filter(w => getWordState(w.word).status === 'learning');
-      break;
-    case 'shuffle':
-      pool = [...VOCAB];
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      break;
-    default:
-      pool = [...VOCAB];
-  }
-  sessionQueue = pool;
-  currentIndex = 0;
-}
-
-function setSessionMode(mode) {
-  sessionMode = mode;
-  document.querySelectorAll('.session-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  buildQueue();
-  renderCard();
-}
-
-// Card rendering
-function renderCard() {
-  if (sessionQueue.length === 0) {
-    document.getElementById('cardWord').textContent = 'No words';
-    document.getElementById('cardPos').textContent = '';
-    document.getElementById('cardPronunciation').textContent = '';
-    document.getElementById('cardDefinition').textContent = 'Try a different filter.';
-    document.getElementById('cardExample').textContent = '';
-    return;
-  }
-
-  const word = sessionQueue[currentIndex];
-  const ws = getWordState(word.word);
-
-  // Unflip
-  document.getElementById('flashcard').classList.remove('flipped');
-
-  // Front
-  document.getElementById('cardWord').textContent = word.word;
-  document.getElementById('cardPos').textContent = word.pos;
-  document.getElementById('cardPronunciation').textContent = word.pronunciation;
-  document.getElementById('cardNumber').textContent = `${currentIndex + 1} / ${sessionQueue.length}`;
-
-  // Back
-  document.getElementById('cardWordBack').textContent = word.word;
-  document.getElementById('cardDefinition').textContent = word.definition;
-  document.getElementById('cardExample').textContent = word.example ? `"${word.example}"` : '';
-  document.getElementById('cardNumberBack').textContent = `${currentIndex + 1} / ${sessionQueue.length}`;
-
-  // Mastery badges
-  const masteryClass = ws.status === 'known' ? 'mastery-known' : ws.status === 'learning' ? 'mastery-learning' : 'mastery-new';
-  const masteryText = ws.status === 'known' ? 'Known' : ws.status === 'learning' ? 'Learning' : 'New';
-  ['cardMastery', 'cardMasteryBack'].forEach(id => {
-    const el = document.getElementById(id);
-    el.className = 'card-mastery ' + masteryClass;
-    el.textContent = masteryText;
+function counts() {
+  let known = 0, learning = 0;
+  VOCAB.forEach(w => {
+    const s = getStatus(w.word);
+    if (s === 'known') known++; else if (s === 'learning') learning++;
   });
-
-  // Progress
-  const progress = sessionQueue.length > 0 ? ((currentIndex + 1) / sessionQueue.length * 100) : 0;
-  document.getElementById('progressFill').style.width = progress + '%';
-  document.getElementById('progressText').textContent = `${currentIndex + 1} / ${sessionQueue.length}`;
-
-  // Prev button
-  document.getElementById('prevBtn').disabled = currentIndex === 0;
-
-  updateStats();
+  return { known, learning, remaining: DECK_TOTAL - known - learning };
+}
+function buildDeck() {
+  const live = getOrder().map(word => byWord[word]).filter(Boolean);
+  const deck = live.filter(w => {
+    if (filter === 'new') return getStatus(w.word) === 'new';
+    if (filter === 'learning') return getStatus(w.word) === 'learning';
+    return true;
+  });
+  return deck.length ? deck : live;
+}
+function currentDeck() {
+  const deck = buildDeck();
+  if (currentIndex > deck.length - 1) currentIndex = Math.max(0, deck.length - 1);
+  return deck;
 }
 
-function flipCard() {
-  document.getElementById('flashcard').classList.toggle('flipped');
+// ── Theme ─────────────────────────────────────────────────────
+function applyTheme() {
+  const app = document.getElementById('app');
+  app.className = 'lex-app t-' + state.appearance;
+  const dark = state.appearance === 'dusk';
+  document.body.classList.toggle('is-dusk', dark);
+  document.getElementById('themeColorMeta').setAttribute('content', dark ? '#1B1916' : '#F5F2E8');
+  document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+    .setAttribute('content', dark ? 'black-translucent' : 'default');
+  document.getElementById('segLight').innerHTML = Icon.sun() + ' Light';
+  document.getElementById('segDark').innerHTML = Icon.moon() + ' Dark';
+  document.getElementById('segLight').classList.toggle('on', !dark);
+  document.getElementById('segDark').classList.toggle('on', dark);
+}
+function setTheme(name) {
+  state.appearance = name; saveState(); applyTheme();
 }
 
+// ── Speech ────────────────────────────────────────────────────
 let preferredVoice = null;
 function loadVoice() {
   const voices = speechSynthesis.getVoices();
@@ -13320,184 +13113,291 @@ function loadVoice() {
     || voices.find(v => v.name.includes('Google UK English'))
     || voices.find(v => /english/i.test(v.name) && v.lang.startsWith('en'));
 }
-speechSynthesis.onvoiceschanged = loadVoice;
-loadVoice();
-
-function speakWord() {
-  if (sessionQueue.length === 0) return;
+if ('speechSynthesis' in window) { speechSynthesis.onvoiceschanged = loadVoice; loadVoice(); }
+function speak(word, btn) {
+  if (!('speechSynthesis' in window) || !word) return;
   speechSynthesis.cancel();
-  const word = sessionQueue[currentIndex].word;
-  const utterance = new SpeechSynthesisUtterance(word);
-  if (preferredVoice) utterance.voice = preferredVoice;
-  utterance.rate = 0.85;
-  utterance.pitch = 1;
-  const btn = document.getElementById('speakBtn');
-  btn.classList.add('speaking');
-  utterance.onend = () => btn.classList.remove('speaking');
-  utterance.onerror = () => btn.classList.remove('speaking');
-  speechSynthesis.speak(utterance);
+  const u = new SpeechSynthesisUtterance(word);
+  if (preferredVoice) u.voice = preferredVoice;
+  u.rate = 0.92;
+  if (btn) {
+    btn.classList.add('speaking');
+    u.onend = u.onerror = () => btn.classList.remove('speaking');
+  }
+  speechSynthesis.speak(u);
 }
 
+// ── Streak / review tracking ─────────────────────────────────
+function recordReview() {
+  const today = new Date().toISOString().split('T')[0];
+  if (state.lastDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    state.streak = (state.lastDate === yesterday) ? state.streak + 1 : 1;
+    state.lastDate = today;
+    state.sessions++;
+  }
+  if (state.reviewedDate !== today) { state.reviewedDate = today; state.reviewedToday = 0; }
+  state.reviewedToday++;
+  saveState();
+}
+
+// ── Render: Study ─────────────────────────────────────────────
+function renderStudy() {
+  const deck = currentDeck();
+  const entry = deck[currentIndex];
+
+  document.querySelectorAll('#filterChips .lex-chip[data-filter]').forEach(b => {
+    b.classList.toggle('on', b.dataset.filter === filter);
+  });
+
+  document.getElementById('deckTotal').textContent = DECK_TOTAL;
+  const c = counts();
+  document.getElementById('statKnown').textContent = c.known;
+  document.getElementById('statLearning').textContent = c.learning;
+  document.getElementById('statLeft').textContent = c.remaining;
+  document.getElementById('barKnown').style.width = (c.known / DECK_TOTAL * 100) + '%';
+  document.getElementById('barLearning').style.width = (c.learning / DECK_TOTAL * 100) + '%';
+
+  const card = document.getElementById('flashcard');
+  card.classList.toggle('is-flipped', flipped);
+
+  if (!entry) {
+    document.getElementById('deckPos').textContent = '0';
+    document.getElementById('cardWord').textContent = 'No words';
+    document.getElementById('cardPos').textContent = '';
+    document.getElementById('cardPron').textContent = '';
+    document.getElementById('cardDef').textContent = 'Try a different filter.';
+    document.getElementById('cardExample').textContent = '';
+    return;
+  }
+
+  document.getElementById('deckPos').textContent = currentIndex + 1;
+  const meta = STATUS_META[getStatus(entry.word)] || STATUS_META.new;
+  const badge = document.getElementById('frontBadge');
+  badge.textContent = meta.label;
+  badge.style.color = meta.color; badge.style.background = meta.bg;
+
+  document.getElementById('cardWord').textContent = entry.word;
+  document.getElementById('cardPos').textContent = entry.pos || '';
+  document.getElementById('cardPron').textContent = entry.pronunciation || '';
+  document.getElementById('cardWordBack').textContent = entry.word;
+  document.getElementById('cardDef').textContent = entry.definition;
+  document.getElementById('cardExample').textContent = entry.example ? '"' + entry.example + '"' : '';
+
+  const fav = isFav(entry.word);
+  ['frontStar', 'backStar'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.toggle('on', fav);
+    el.innerHTML = Icon.star(fav);
+  });
+
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+}
+
+function flip() { flipped = !flipped; document.getElementById('flashcard').classList.toggle('is-flipped', flipped); }
+function advance(dir) {
+  const deck = buildDeck();
+  flipped = false;
+  currentIndex = Math.max(0, Math.min(deck.length - 1, currentIndex + dir));
+  renderStudy();
+}
 function markWord(status) {
-  if (sessionQueue.length === 0) return;
-  const word = sessionQueue[currentIndex];
-  setWordState(word.word, status);
-  updateStreak();
-  nextCard();
+  const deck = buildDeck();
+  const entry = deck[currentIndex];
+  if (!entry) return;
+  setStatus(entry.word, status);
+  recordReview();
+  renderStudy();
+  setTimeout(() => advance(1), 120);
+}
+function favCurrent() {
+  const deck = buildDeck();
+  const entry = deck[currentIndex];
+  if (!entry) return;
+  const wasOn = isFav(entry.word);
+  toggleFav(entry.word);
+  renderStudy();
+  updateFavBadge();
+  if (!wasOn) {
+    ['frontStar', 'backStar'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.add('pop');
+    });
+    clearTimeout(favTimer);
+    favTimer = setTimeout(() => {
+      document.getElementById('frontStar').classList.remove('pop');
+      document.getElementById('backStar').classList.remove('pop');
+    }, 520);
+  }
+}
+function shuffleDeck() {
+  const a = getOrder().slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  state.order = a; saveState();
+  currentIndex = 0; flipped = false;
+  renderStudy();
+}
+function setFilter(f) { filter = f; currentIndex = 0; flipped = false; renderStudy(); }
+
+// ── Render: word rows ─────────────────────────────────────────
+function rowHTML(w) {
+  const meta = STATUS_META[getStatus(w.word)] || STATUS_META.new;
+  const fav = isFav(w.word);
+  const def = (w.definition || '');
+  return `<div class="lex-row" data-word="${encodeURIComponent(w.word)}">
+    <div class="lex-row-dot" style="background:${meta.color}"></div>
+    <div class="lex-row-main">
+      <div class="lex-row-word">${w.word}</div>
+      <div class="lex-row-def">${def}</div>
+    </div>
+    <button class="lex-star sm${fav ? ' on' : ''}" data-fav="${encodeURIComponent(w.word)}" aria-label="Favorite">${Icon.star(fav)}</button>
+  </div>`;
+}
+function bindRows(container) {
+  container.querySelectorAll('.lex-row').forEach(row => {
+    row.addEventListener('click', () => openWord(decodeURIComponent(row.dataset.word)));
+  });
+  container.querySelectorAll('[data-fav]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFav(decodeURIComponent(btn.dataset.fav));
+      updateFavBadge();
+      if (tab === 'browse') renderBrowse();
+      if (tab === 'fav') renderFav();
+    });
+  });
 }
 
-function nextCard() {
-  if (currentIndex < sessionQueue.length - 1) {
-    currentIndex++;
-    renderCard();
+function renderBrowse() {
+  document.getElementById('browseCount').textContent = VOCAB.length;
+  const q = searchTerm.toLowerCase();
+  const list = VOCAB.filter(w => !q
+    || w.word.toLowerCase().includes(q)
+    || (w.definition || '').toLowerCase().includes(q));
+  const el = document.getElementById('browseList');
+  el.innerHTML = list.length
+    ? list.map(rowHTML).join('')
+    : '<div class="lex-empty">No matches.</div>';
+  bindRows(el);
+}
+
+function renderFav() {
+  const list = VOCAB.filter(w => isFav(w.word));
+  document.getElementById('favCountLabel').textContent =
+    list.length + (list.length === 1 ? ' word saved' : ' words saved');
+  const body = document.getElementById('favBody');
+  if (list.length === 0) {
+    body.className = 'lex-fav-empty';
+    body.innerHTML = `<div class="lex-fav-star">${Icon.star(false, 40)}</div>
+      <div class="lex-fav-empty-t">No favorites yet</div>
+      <div class="lex-fav-empty-s">Tap the star on any card to keep a word here.</div>
+      <button class="lex-chip on" id="favBrowseBtn" style="margin-top:18px">Browse words</button>`;
+    document.getElementById('favBrowseBtn').addEventListener('click', () => setTab('browse'));
   } else {
-    currentIndex = 0;
-    renderCard();
+    body.className = 'lex-scroll';
+    body.innerHTML = list.map(rowHTML).join('');
+    bindRows(body);
   }
 }
 
-function prevCard() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    renderCard();
+function renderProgress() {
+  const c = counts();
+  const total = DECK_TOTAL;
+  const pct = Math.round(c.known / total * 100);
+  const R = 78, C = 2 * Math.PI * R;
+  document.getElementById('ringLearn').setAttribute('stroke-dasharray',
+    (C * ((c.known + c.learning) / total)) + ' ' + C);
+  document.getElementById('ringKnown').setAttribute('stroke-dasharray',
+    (C * (c.known / total)) + ' ' + C);
+  document.getElementById('ringPct').textContent = pct;
+  document.getElementById('pKnown').textContent = c.known;
+  document.getElementById('pLearning').textContent = c.learning;
+  document.getElementById('pRemaining').textContent = c.remaining;
+  document.getElementById('streakDays').textContent = state.streak;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('reviewedToday').textContent = (state.reviewedDate === today) ? state.reviewedToday : 0;
+  document.getElementById('deckSize').textContent = DECK_TOTAL;
+}
+
+// ── Favorites tab badge ──────────────────────────────────────
+function updateFavBadge() {
+  const ico = document.getElementById('tabIcoFav');
+  const active = tab === 'fav';
+  ico.innerHTML = Icon.tabFav(active);
+  if (state.favs.length > 0) {
+    ico.innerHTML += `<span class="lex-tab-badge">${state.favs.length}</span>`;
   }
 }
 
-function skipCard() {
-  nextCard();
-}
-
-function updateStats() {
-  let known = 0, learning = 0, newCount = 0;
-  VOCAB.forEach(w => {
-    const s = getWordState(w.word).status;
-    if (s === 'known') known++;
-    else if (s === 'learning') learning++;
-    else newCount++;
+// ── Tabs ──────────────────────────────────────────────────────
+const SCREENS = { study: 'studyScreen', browse: 'browseScreen', fav: 'favScreen', progress: 'progressScreen' };
+function setTab(name) {
+  tab = name;
+  Object.keys(SCREENS).forEach(k => {
+    document.getElementById(SCREENS[k]).classList.toggle('on', k === name);
   });
-
-  document.getElementById('knownCount').textContent = known;
-  document.getElementById('learningCount').textContent = learning;
-  document.getElementById('remainingCount').textContent = newCount;
-
-  // Stats view
-  document.getElementById('statsKnown').textContent = known;
-  document.getElementById('statsLearning').textContent = learning;
-  document.getElementById('statsNew').textContent = newCount;
-  document.getElementById('statsSessions').textContent = state.sessions;
-  document.getElementById('streakNumber').textContent = state.streak;
+  document.querySelectorAll('.lex-tab[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  renderTabIcons();
+  if (name === 'study') renderStudy();
+  if (name === 'browse') renderBrowse();
+  if (name === 'fav') renderFav();
+  if (name === 'progress') renderProgress();
+}
+function renderTabIcons() {
+  document.getElementById('tabIcoStudy').innerHTML = Icon.tabStudy(tab === 'study');
+  document.getElementById('tabIcoBrowse').innerHTML = Icon.tabBrowse(tab === 'browse');
+  document.getElementById('tabIcoProgress').innerHTML = Icon.tabProgress(tab === 'progress');
+  updateFavBadge();
 }
 
-// View switching
-function switchView(view) {
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('cardView').classList.toggle('active', view === 'card');
-  document.getElementById('listView').classList.toggle('active', view === 'list');
-  document.getElementById('statsView').classList.toggle('active', view === 'stats');
-  if (view === 'list') renderList();
-  if (view === 'stats') updateStats();
+function openWord(word) {
+  filter = 'all';
+  flipped = false;
+  const pos = getOrder().indexOf(word);
+  currentIndex = pos >= 0 ? pos : 0;
+  setTab('study');
 }
 
-// List view
-function renderList() {
-  const list = document.getElementById('wordList');
-  let filtered = VOCAB.filter(w => {
-    const s = getWordState(w.word).status;
-    if (listFilter !== 'all' && s !== listFilter) return false;
-    if (searchTerm && !w.word.toLowerCase().includes(searchTerm.toLowerCase()) && !w.definition.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-    return true;
-  });
+// ── Static icon injection ────────────────────────────────────
+document.getElementById('shuffleBtn').innerHTML = Icon.shuffle();
+document.getElementById('searchIco').innerHTML = Icon.search();
+document.getElementById('frontSpeak').innerHTML = Icon.speaker();
+document.getElementById('backSpeak').innerHTML = Icon.speaker();
+document.getElementById('prevBtn').innerHTML = Icon.arrowL() + ' Prev';
+document.getElementById('skipBtn').innerHTML = 'Skip ' + Icon.arrowR();
 
-  list.innerHTML = filtered.map(w => {
-    const s = getWordState(w.word).status;
-    const badgeClass = s === 'known' ? 'mastery-known' : s === 'learning' ? 'mastery-learning' : 'mastery-new';
-    const badgeText = s === 'known' ? 'Known' : s === 'learning' ? 'Learning' : 'New';
-    return `<li class="word-item" onclick="jumpToWord('${w.word}')">
-      <div class="word-item-left">
-        <span class="word-item-word">${w.word}</span>
-        <span class="word-item-pos">${w.pos}</span>
-        <span class="word-item-badge ${badgeClass}">${badgeText}</span>
-      </div>
-      <span class="word-item-def">${w.definition.substring(0, 60)}${w.definition.length > 60 ? '…' : ''}</span>
-    </li>`;
-  }).join('');
-}
+// ── Event wiring ─────────────────────────────────────────────
+document.getElementById('cardWrap').addEventListener('click', flip);
+['frontStar', 'backStar'].forEach(id =>
+  document.getElementById(id).addEventListener('click', (e) => { e.stopPropagation(); favCurrent(); }));
+['frontSpeak', 'backSpeak'].forEach(id =>
+  document.getElementById(id).addEventListener('click', function (e) {
+    e.stopPropagation();
+    const deck = buildDeck();
+    const entry = deck[currentIndex];
+    if (entry) speak(entry.word, this);
+  }));
+document.querySelectorAll('#filterChips .lex-chip[data-filter]').forEach(b =>
+  b.addEventListener('click', () => setFilter(b.dataset.filter)));
+document.getElementById('shuffleBtn').addEventListener('click', shuffleDeck);
+document.getElementById('markLearning').addEventListener('click', () => markWord('learning'));
+document.getElementById('markKnown').addEventListener('click', () => markWord('known'));
+document.getElementById('prevBtn').addEventListener('click', () => advance(-1));
+document.getElementById('skipBtn').addEventListener('click', () => advance(1));
+document.getElementById('searchBox').addEventListener('input', (e) => { searchTerm = e.target.value; renderBrowse(); });
+document.querySelectorAll('.lex-tab[data-tab]').forEach(b =>
+  b.addEventListener('click', () => setTab(b.dataset.tab)));
+document.getElementById('segLight').addEventListener('click', () => setTheme('manuscript'));
+document.getElementById('segDark').addEventListener('click', () => setTheme('dusk'));
 
-function filterList(term) {
-  searchTerm = term;
-  renderList();
-}
-
-function setListFilter(filter) {
-  listFilter = filter;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  renderList();
-}
-
-function jumpToWord(word) {
-  sessionMode = 'all';
-  buildQueue();
-  const idx = sessionQueue.findIndex(w => w.word === word);
-  if (idx >= 0) currentIndex = idx;
-  switchViewDirect('card');
-  renderCard();
-}
-
-function switchViewDirect(view) {
-  document.querySelectorAll('.nav button').forEach((b, i) => {
-    b.classList.toggle('active', (view === 'card' && i === 0) || (view === 'list' && i === 1) || (view === 'stats' && i === 2));
-  });
-  document.getElementById('cardView').classList.toggle('active', view === 'card');
-  document.getElementById('listView').classList.toggle('active', view === 'list');
-  document.getElementById('statsView').classList.toggle('active', view === 'stats');
-}
-
-function resetProgress() {
-  if (confirm('Reset all progress? This cannot be undone.')) {
-    state = defaultState();
-    saveState();
-    buildQueue();
-    renderCard();
-    updateStats();
-  }
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT') return;
-  switch(e.key) {
-    case ' ':
-      e.preventDefault();
-      flipCard();
-      break;
-    case 'ArrowRight':
-      e.preventDefault();
-      nextCard();
-      break;
-    case 'ArrowLeft':
-      e.preventDefault();
-      prevCard();
-      break;
-    case '1':
-      markWord('learning');
-      break;
-    case '2':
-      markWord('known');
-      break;
-    case 's':
-    case 'S':
-      speakWord();
-      break;
-  }
-});
-
-// Init
-buildQueue();
-renderCard();
-updateStats();
+// ── Init ──────────────────────────────────────────────────────
+applyTheme();
+renderTabIcons();
+renderStudy();
+saveState();
 </script>
-
 </body>
 </html>

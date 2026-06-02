@@ -4,8 +4,8 @@
   "description": "A refined vocabulary flashcard app for building word mastery.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#FAFAF7",
-  "theme_color": "#FAFAF7",
+  "background_color": "#F5F2E8",
+  "theme_color": "#F5F2E8",
   "icons": [
     {
       "src": "icon-192.png",

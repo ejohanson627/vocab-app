@@ -1,9 +1,9 @@
-const CACHE_NAME = 'lexicon-v2';
+const CACHE_NAME = 'lexicon-v3';
 const ASSETS = [
   '.',
   'index.html',
   'manifest.json',
-  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap'
+  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Work+Sans:wght@400;500;600&display=swap'
 ];
 
 self.addEventListener('install', e => {
