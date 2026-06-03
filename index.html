@@ -95,14 +95,14 @@ if ('serviceWorker' in navigator) {
   .lex-screen {
     flex: 1; min-height: 0; min-width: 0;
     display: none; flex-direction: column;
-    padding: calc(env(safe-area-inset-top) + 12px) 20px 0;
+    padding: calc(env(safe-area-inset-top) + 2px) 20px 0;
   }
   .lex-screen.on { display: flex; }
 
   /* ── Study: header ─────────────────────────────────────────── */
   .lex-header {
     display: flex; align-items: baseline; justify-content: space-between;
-    padding: 6px 2px 10px;
+    padding: 0 2px 8px;
   }
   .lex-wordmark {
     font-family: var(--serif); font-weight: 600;
@@ -366,7 +366,7 @@ if ('serviceWorker' in navigator) {
   /* ── Tab bar ───────────────────────────────────────────────── */
   .lex-tabbar {
     display: flex; align-items: flex-start; justify-content: space-around;
-    padding: 10px 8px calc(12px + env(safe-area-inset-bottom));
+    padding: 8px 8px calc(4px + env(safe-area-inset-bottom));
     background: var(--glass);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
@@ -13205,10 +13205,19 @@ function markWord(status) {
   const deck = buildDeck();
   const entry = deck[currentIndex];
   if (!entry) return;
-  setStatus(entry.word, status);
+  const markedWord = entry.word;
+  setStatus(markedWord, status);
   recordReview();
+  // After re-statusing, the word may no longer match the active filter
+  // (e.g. "New"/"Learning"), which collapses the deck so currentIndex already
+  // points to the next card. Only advance when the word is still in the deck
+  // (e.g. "All") — otherwise advancing would skip the card that slid in.
+  const nextDeck = buildDeck();
+  const stillInDeck = nextDeck[currentIndex] && nextDeck[currentIndex].word === markedWord;
+  flipped = false;
+  if (currentIndex > nextDeck.length - 1) currentIndex = Math.max(0, nextDeck.length - 1);
   renderStudy();
-  setTimeout(() => advance(1), 120);
+  if (stillInDeck) setTimeout(() => advance(1), 120);
 }
 function favCurrent() {
   const deck = buildDeck();
