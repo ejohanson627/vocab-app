@@ -135,7 +135,7 @@ if ('serviceWorker' in navigator) {
   .lex-stats .dot { width: 3px; height: 3px; border-radius: 99px; background: var(--muted); opacity: .5; }
 
   /* ── Study: chips ──────────────────────────────────────────── */
-  .lex-chips { display: flex; gap: 8px; padding: 4px 0 10px; }
+  .lex-chips { display: flex; align-items: stretch; gap: 8px; padding: 4px 0 10px; }
   .lex-chip {
     padding: 9px 15px; border-radius: 99px;
     border: 1px solid var(--line); background: transparent; color: var(--ink2);
@@ -144,10 +144,21 @@ if ('serviceWorker' in navigator) {
   }
   .lex-chip:active { transform: scale(0.96); }
   .lex-chip.on { background: var(--chip-on-bg); color: var(--chip-on-fg); border-color: var(--chip-on-bg); }
-  .lex-chip-icon {
-    margin-left: auto; width: 40px; padding: 0;
-    display: flex; align-items: center; justify-content: center; color: var(--ink2);
+  /* Segmented filter control: three equal-width, evenly spaced options */
+  .lex-filters {
+    flex: 1; display: flex; gap: 4px; padding: 4px; border-radius: 99px;
+    background: rgba(var(--tint), 0.05); border: 1px solid var(--line-soft);
   }
+  .lex-filters .lex-chip {
+    flex: 1; padding: 8px 0; text-align: center; border: none;
+  }
+  .lex-chip-icon {
+    flex: 0 0 auto; width: 46px; padding: 0;
+    display: flex; align-items: center; justify-content: center; color: var(--ink2);
+    border: 1px solid var(--line); border-radius: 14px;
+    background: rgba(var(--tint), 0.04); transition: all .18s ease;
+  }
+  .lex-chip-icon:active { transform: scale(0.94); color: var(--ink); background: rgba(var(--tint), 0.09); }
 
   /* ── Study: card ───────────────────────────────────────────── */
   .lex-cardarea { flex: 1; min-height: 0; display: flex; padding: 0 0 2px; }
@@ -416,10 +427,12 @@ if ('serviceWorker' in navigator) {
         </div>
 
         <div class="lex-chips" id="filterChips">
-          <button class="lex-chip on" data-filter="all">All</button>
-          <button class="lex-chip" data-filter="new">New</button>
-          <button class="lex-chip" data-filter="learning">Learning</button>
-          <button class="lex-chip lex-chip-icon" id="shuffleBtn" aria-label="Shuffle"></button>
+          <div class="lex-filters">
+            <button class="lex-chip on" data-filter="all">All</button>
+            <button class="lex-chip" data-filter="new">New</button>
+            <button class="lex-chip" data-filter="learning">Learning</button>
+          </div>
+          <button class="lex-chip-icon" id="shuffleBtn" aria-label="Shuffle"></button>
         </div>
 
         <div class="lex-cardarea">
@@ -12976,8 +12989,8 @@ const Icon = {
       <path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8 8 0 010 12"/></svg>`,
   shuffle: () => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
       stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 6h3.5c1.4 0 2.6.7 3.4 1.9M21 6h-4l1.5-1.5M21 6l-1.5 1.5"/>
-      <path d="M3 18h3.5c2.4 0 4.3-2 5.7-4.2C13.6 11.6 15.1 10 17.5 10H21M21 18h-4l1.5 1.5M21 18l-1.5-1.5"/></svg>`,
+      <path d="M16 4h4v4"/><path d="M4 20L20 4"/>
+      <path d="M16 20h4v-4"/><path d="M14.5 14.5L20 20"/><path d="M4 4l5.5 5.5"/></svg>`,
   arrowL: () => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l-7 7 7 7"/></svg>`,
   arrowR: () => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
