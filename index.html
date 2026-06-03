@@ -49,7 +49,7 @@ if ('serviceWorker' in navigator) {
     --ink2: #5b554a;
     --muted: #9b958a;
     --card: #FFFFFF;
-    --gold: #C8A02A;
+    --gold: #C8A02A;   --gold-rgb: 200,160,42;
     --amber: #97681A;  --amber-rgb: 151,104,26;
     --green: #3C6B52;  --green-rgb: 60,107,82;
     --serif: 'Cormorant Garamond', Georgia, serif;
@@ -72,7 +72,7 @@ if ('serviceWorker' in navigator) {
     --ink2: #a59e8d;
     --muted: #7c7567;
     --card: #262320;
-    --gold: #D4AF37;
+    --gold: #D4AF37;   --gold-rgb: 212,175,55;
     --amber: #CDA15A;  --amber-rgb: 205,161,90;
     --green: #82B59A;  --green-rgb: 130,181,154;
     --radius: 26px;
@@ -159,6 +159,12 @@ if ('serviceWorker' in navigator) {
     background: rgba(var(--tint), 0.04); transition: all .18s ease;
   }
   .lex-chip-icon:active { transform: scale(0.94); color: var(--ink); background: rgba(var(--tint), 0.09); }
+  /* Active "random mode" — gold accent */
+  .lex-chip-icon.on {
+    color: var(--gold);
+    border-color: rgba(var(--gold-rgb), 0.55);
+    background: rgba(var(--gold-rgb), 0.12);
+  }
 
   /* ── Study: card ───────────────────────────────────────────── */
   .lex-cardarea { flex: 1; min-height: 0; display: flex; padding: 0 0 2px; }
@@ -13027,7 +13033,7 @@ const byWord = Object.fromEntries(VOCAB.map(w => [w.word, w]));
 
 function defaultState() {
   return {
-    words: {}, favs: [], order: null,
+    words: {}, favs: [], order: null, shuffled: false,
     sessions: 0, streak: 0, lastDate: null,
     reviewedToday: 0, reviewedDate: null,
     appearance: null, firstUsed: new Date().toISOString(),
@@ -13162,6 +13168,9 @@ function renderStudy() {
   document.querySelectorAll('#filterChips .lex-chip[data-filter]').forEach(b => {
     b.classList.toggle('on', b.dataset.filter === filter);
   });
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  shuffleBtn.classList.toggle('on', !!state.shuffled);
+  shuffleBtn.setAttribute('aria-pressed', state.shuffled ? 'true' : 'false');
 
   document.getElementById('deckTotal').textContent = DECK_TOTAL;
   const c = counts();
@@ -13252,13 +13261,19 @@ function favCurrent() {
     }, 520);
   }
 }
-function shuffleDeck() {
-  const a = getOrder().slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+function toggleShuffle() {
+  state.shuffled = !state.shuffled;
+  if (state.shuffled) {
+    const a = getOrder().slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    state.order = a;
+  } else {
+    state.order = VOCAB.map(w => w.word); // restore original sequential order
   }
-  state.order = a; saveState();
+  saveState();
   currentIndex = 0; flipped = false;
   renderStudy();
 }
@@ -13404,7 +13419,7 @@ document.getElementById('cardWrap').addEventListener('click', flip);
   }));
 document.querySelectorAll('#filterChips .lex-chip[data-filter]').forEach(b =>
   b.addEventListener('click', () => setFilter(b.dataset.filter)));
-document.getElementById('shuffleBtn').addEventListener('click', shuffleDeck);
+document.getElementById('shuffleBtn').addEventListener('click', toggleShuffle);
 document.getElementById('markLearning').addEventListener('click', () => markWord('learning'));
 document.getElementById('markKnown').addEventListener('click', () => markWord('known'));
 document.getElementById('prevBtn').addEventListener('click', () => advance(-1));
