@@ -109,11 +109,6 @@ if ('serviceWorker' in navigator) {
     font-size: 26px; letter-spacing: 0.22em; color: var(--ink);
     padding-left: 0.22em;
   }
-  .lex-deckpos {
-    font-family: var(--serif); font-size: 18px; color: var(--muted);
-    font-feature-settings: "onum" 1; letter-spacing: 0.02em;
-  }
-  .lex-deckpos span { opacity: 0.55; }
 
   /* ── Study: progress strip ─────────────────────────────────── */
   .lex-progress { padding: 4px 2px 12px; }
@@ -144,13 +139,16 @@ if ('serviceWorker' in navigator) {
   }
   .lex-chip:active { transform: scale(0.96); }
   .lex-chip.on { background: var(--chip-on-bg); color: var(--chip-on-fg); border-color: var(--chip-on-bg); }
-  /* Segmented filter control: three equal-width, evenly spaced options */
+  /* Segmented filter control: horizontally scrollable options */
   .lex-filters {
-    flex: 1; display: flex; gap: 4px; padding: 4px; border-radius: 99px;
+    flex: 1; min-width: 0; display: flex; gap: 4px; padding: 4px; border-radius: 99px;
     background: rgba(var(--tint), 0.05); border: 1px solid var(--line-soft);
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; -ms-overflow-style: none;
   }
+  .lex-filters::-webkit-scrollbar { display: none; }
   .lex-filters .lex-chip {
-    flex: 1; padding: 8px 0; text-align: center; border: none;
+    flex: 0 0 auto; padding: 8px 16px; text-align: center; border: none;
   }
   .lex-chip-icon {
     flex: 0 0 auto; width: 46px; padding: 0;
@@ -415,7 +413,6 @@ if ('serviceWorker' in navigator) {
       <div class="lex-screen on" id="studyScreen">
         <header class="lex-header">
           <div class="lex-wordmark">LEXICON</div>
-          <div class="lex-deckpos"><span id="deckPos">1</span> <span>/</span> <span id="deckTotal">0</span></div>
         </header>
 
         <div class="lex-progress">
@@ -435,6 +432,7 @@ if ('serviceWorker' in navigator) {
         <div class="lex-chips" id="filterChips">
           <div class="lex-filters">
             <button class="lex-chip on" data-filter="all">All</button>
+            <button class="lex-chip" data-filter="favorites">Favorites</button>
             <button class="lex-chip" data-filter="new">New</button>
             <button class="lex-chip" data-filter="learning">Learning</button>
           </div>
@@ -13110,6 +13108,7 @@ function buildDeck() {
   const deck = live.filter(w => {
     if (filter === 'new') return getStatus(w.word) === 'new';
     if (filter === 'learning') return getStatus(w.word) === 'learning';
+    if (filter === 'favorites') return isFav(w.word);
     return true;
   });
   return deck.length ? deck : live;
@@ -13186,7 +13185,6 @@ function renderStudy() {
   shuffleBtn.classList.toggle('on', !!state.shuffled);
   shuffleBtn.setAttribute('aria-pressed', state.shuffled ? 'true' : 'false');
 
-  document.getElementById('deckTotal').textContent = DECK_TOTAL;
   const c = counts();
   document.getElementById('statKnown').textContent = c.known;
   document.getElementById('statLearning').textContent = c.learning;
@@ -13198,7 +13196,6 @@ function renderStudy() {
   card.classList.toggle('is-flipped', flipped);
 
   if (!entry) {
-    document.getElementById('deckPos').textContent = '0';
     document.getElementById('cardWord').textContent = 'No words';
     document.getElementById('cardPos').textContent = '';
     document.getElementById('cardPron').textContent = '';
@@ -13207,7 +13204,6 @@ function renderStudy() {
     return;
   }
 
-  document.getElementById('deckPos').textContent = currentIndex + 1;
   const meta = STATUS_META[getStatus(entry.word)] || STATUS_META.new;
   const badge = document.getElementById('frontBadge');
   badge.textContent = meta.label;
