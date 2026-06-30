@@ -477,7 +477,7 @@ if ('serviceWorker' in navigator) {
                 <div class="lex-card-body lex-back-body">
                   <div class="lex-def" id="cardDef"><span id="cardDefText">—</span><span class="lex-caret" id="cardCaret" aria-hidden="true"></span></div>
                   <div class="lex-rule"></div>
-                  <div class="lex-example" id="cardExample"></div>
+                  <div class="lex-example" id="cardExample"><span id="cardExampleText"></span><span class="lex-caret" id="cardExampleCaret" aria-hidden="true"></span></div>
                 </div>
                 <div class="lex-card-foot">
                   <button class="lex-speak" id="backSpeak" aria-label="Pronounce"></button>
@@ -13208,6 +13208,7 @@ function renderStudy() {
   // Reset any in-progress typewriter animation when the card content changes.
   cancelTypewriter();
   document.getElementById('cardCaret').classList.remove('is-visible', 'is-blinking');
+  document.getElementById('cardExampleCaret').classList.remove('is-visible', 'is-blinking');
 
   if (!entry) {
     document.getElementById('cardWord').textContent = 'No words';
@@ -13215,7 +13216,8 @@ function renderStudy() {
     document.getElementById('cardPron').textContent = '';
     document.getElementById('cardDef').dataset.full = 'Try a different filter.';
     document.getElementById('cardDefText').textContent = 'Try a different filter.';
-    document.getElementById('cardExample').textContent = '';
+    document.getElementById('cardExample').dataset.full = '';
+    document.getElementById('cardExampleText').textContent = '';
     return;
   }
 
@@ -13230,7 +13232,9 @@ function renderStudy() {
   document.getElementById('cardWordBack').textContent = entry.word;
   document.getElementById('cardDef').dataset.full = entry.definition;
   document.getElementById('cardDefText').textContent = entry.definition;
-  document.getElementById('cardExample').textContent = entry.example ? '"' + entry.example + '"' : '';
+  const exFull = entry.example ? '"' + entry.example + '"' : '';
+  document.getElementById('cardExample').dataset.full = exFull;
+  document.getElementById('cardExampleText').textContent = exFull;
 
   const fav = isFav(entry.word);
   ['frontStar', 'backStar'].forEach(id => {
@@ -13250,19 +13254,12 @@ function cancelTypewriter() {
 function prefersReducedMotion() {
   return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
-function startTypewriter() {
-  cancelTypewriter();
-  const defEl = document.getElementById('cardDef');
-  const textEl = document.getElementById('cardDefText');
-  const caret = document.getElementById('cardCaret');
-  const full = defEl.dataset.full || '';
+function hideCaret(caret) { caret.classList.remove('is-visible', 'is-blinking'); }
+// Type `full` into `textEl` one character at a time, with `caret` trailing the
+// text. Calls onDone() when finished (defaults to leaving the caret blinking).
+function typeText(textEl, caret, full, delayStart, onDone) {
   caret.classList.add('is-visible');
   caret.classList.remove('is-blinking');
-  if (prefersReducedMotion() || !full) {
-    textEl.textContent = full;
-    caret.classList.add('is-blinking');
-    return;
-  }
   textEl.textContent = '';
   let i = 0;
   const type = () => {
@@ -13270,7 +13267,7 @@ function startTypewriter() {
     textEl.textContent = full.slice(0, i);
     if (i >= full.length) {
       typeTimer = null;
-      caret.classList.add('is-blinking');
+      if (onDone) onDone(); else caret.classList.add('is-blinking');
       return;
     }
     const ch = full[i - 1];
@@ -13279,24 +13276,62 @@ function startTypewriter() {
     else if ('.;:!?'.includes(ch)) delay = 230;
     typeTimer = setTimeout(type, delay);
   };
-  typeTimer = setTimeout(type, 60);
+  typeTimer = setTimeout(type, delayStart);
+}
+function startTypewriter() {
+  cancelTypewriter();
+  const defText = document.getElementById('cardDefText');
+  const defCaret = document.getElementById('cardCaret');
+  const exText = document.getElementById('cardExampleText');
+  const exCaret = document.getElementById('cardExampleCaret');
+  const defFull = document.getElementById('cardDef').dataset.full || '';
+  const exFull = document.getElementById('cardExample').dataset.full || '';
+
+  hideCaret(defCaret);
+  hideCaret(exCaret);
+
+  if (prefersReducedMotion()) {
+    defText.textContent = defFull;
+    exText.textContent = exFull;
+    (exFull ? exCaret : defCaret).classList.add('is-visible', 'is-blinking');
+    return;
+  }
+
+  defText.textContent = '';
+  exText.textContent = '';
+
+  // Type the definition; when it finishes, move the caret down to the example
+  // (if there is one) and type that next.
+  defCaret.classList.add('is-visible');
+  typeText(defText, defCaret, defFull, 60, () => {
+    if (!exFull) { defCaret.classList.add('is-blinking'); return; }
+    hideCaret(defCaret);
+    typeText(exText, exCaret, exFull, 350);
+  });
 }
 function flip() {
   flipped = !flipped;
   document.getElementById('flashcard').classList.toggle('is-flipped', flipped);
-  const caret = document.getElementById('cardCaret');
+  const defCaret = document.getElementById('cardCaret');
+  const exCaret = document.getElementById('cardExampleCaret');
   if (flipped) {
-    // Clear the definition and start "typing" it as the back face rotates in.
+    // Clear the back text and start "typing" it as the back face rotates in.
     cancelTypewriter();
-    if (!prefersReducedMotion()) document.getElementById('cardDefText').textContent = '';
-    caret.classList.add('is-visible');
-    caret.classList.remove('is-blinking');
+    if (!prefersReducedMotion()) {
+      document.getElementById('cardDefText').textContent = '';
+      document.getElementById('cardExampleText').textContent = '';
+    }
+    hideCaret(exCaret);
+    defCaret.classList.add('is-visible');
+    defCaret.classList.remove('is-blinking');
     typeTimer = setTimeout(startTypewriter, 280);
   } else {
     // Flipping back to the front: stop typing and restore the full text.
     cancelTypewriter();
     document.getElementById('cardDefText').textContent = document.getElementById('cardDef').dataset.full || '';
-    caret.classList.remove('is-visible', 'is-blinking');
+    document.getElementById('cardExampleText').textContent = document.getElementById('cardExample').dataset.full || '';
+    hideCaret(defCaret);
+    hideCaret(exCaret);
   }
 }
 function advance(dir) {
