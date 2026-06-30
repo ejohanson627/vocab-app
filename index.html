@@ -205,8 +205,8 @@ if ('serviceWorker' in navigator) {
     color: var(--ink); font-weight: 500; text-wrap: pretty;
   }
   .lex-caret {
-    display: inline-block; width: 2px; height: 1.05em; margin-left: 3px;
-    background: var(--ink); vertical-align: -0.12em; border-radius: 1px; opacity: 0;
+    display: inline-block; width: 0.5em; height: 0.5em; margin-left: 4px;
+    background: var(--ink); vertical-align: 0.04em; border-radius: 50%; opacity: 0;
   }
   .lex-caret.is-visible { opacity: 1; }
   .lex-caret.is-blinking { animation: caretblink 1.05s steps(1) infinite; }
@@ -13271,9 +13271,9 @@ function typeText(textEl, caret, full, delayStart, onDone) {
       return;
     }
     const ch = full[i - 1];
-    let delay = 30;
-    if (ch === ',') delay = 150;
-    else if ('.;:!?'.includes(ch)) delay = 230;
+    let delay = 65;
+    if (ch === ',') delay = 300;
+    else if ('.;:!?'.includes(ch)) delay = 460;
     typeTimer = setTimeout(type, delay);
   };
   typeTimer = setTimeout(type, delayStart);
