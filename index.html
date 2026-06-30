@@ -204,6 +204,16 @@ if ('serviceWorker' in navigator) {
     font-family: var(--serif); font-size: 27px; line-height: 1.22;
     color: var(--ink); font-weight: 500; text-wrap: pretty;
   }
+  .lex-caret {
+    display: inline-block; width: 2px; height: 1.05em; margin-left: 3px;
+    background: var(--ink); vertical-align: -0.12em; border-radius: 1px; opacity: 0;
+  }
+  .lex-caret.is-visible { opacity: 1; }
+  .lex-caret.is-blinking { animation: caretblink 1.05s steps(1) infinite; }
+  @keyframes caretblink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .lex-caret.is-blinking { animation: none; }
+  }
   .lex-rule { width: 46px; height: 1px; background: var(--line); }
   .lex-example {
     font-family: var(--serif); font-style: italic; font-size: 20px;
@@ -465,7 +475,7 @@ if ('serviceWorker' in navigator) {
                   <button class="lex-star" id="backStar" aria-label="Favorite"></button>
                 </div>
                 <div class="lex-card-body lex-back-body">
-                  <div class="lex-def" id="cardDef">—</div>
+                  <div class="lex-def" id="cardDef"><span id="cardDefText">—</span><span class="lex-caret" id="cardCaret" aria-hidden="true"></span></div>
                   <div class="lex-rule"></div>
                   <div class="lex-example" id="cardExample"></div>
                 </div>
@@ -13195,11 +13205,16 @@ function renderStudy() {
   const card = document.getElementById('flashcard');
   card.classList.toggle('is-flipped', flipped);
 
+  // Reset any in-progress typewriter animation when the card content changes.
+  cancelTypewriter();
+  document.getElementById('cardCaret').classList.remove('is-visible', 'is-blinking');
+
   if (!entry) {
     document.getElementById('cardWord').textContent = 'No words';
     document.getElementById('cardPos').textContent = '';
     document.getElementById('cardPron').textContent = '';
-    document.getElementById('cardDef').textContent = 'Try a different filter.';
+    document.getElementById('cardDef').dataset.full = 'Try a different filter.';
+    document.getElementById('cardDefText').textContent = 'Try a different filter.';
     document.getElementById('cardExample').textContent = '';
     return;
   }
@@ -13213,7 +13228,8 @@ function renderStudy() {
   document.getElementById('cardPos').textContent = entry.pos || '';
   document.getElementById('cardPron').textContent = entry.pronunciation || '';
   document.getElementById('cardWordBack').textContent = entry.word;
-  document.getElementById('cardDef').textContent = entry.definition;
+  document.getElementById('cardDef').dataset.full = entry.definition;
+  document.getElementById('cardDefText').textContent = entry.definition;
   document.getElementById('cardExample').textContent = entry.example ? '"' + entry.example + '"' : '';
 
   const fav = isFav(entry.word);
@@ -13226,7 +13242,63 @@ function renderStudy() {
   document.getElementById('prevBtn').disabled = currentIndex === 0;
 }
 
-function flip() { flipped = !flipped; document.getElementById('flashcard').classList.toggle('is-flipped', flipped); }
+// ── Typewriter: definition on the card back ───────────────────
+let typeTimer = null;
+function cancelTypewriter() {
+  if (typeTimer) { clearTimeout(typeTimer); typeTimer = null; }
+}
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function startTypewriter() {
+  cancelTypewriter();
+  const defEl = document.getElementById('cardDef');
+  const textEl = document.getElementById('cardDefText');
+  const caret = document.getElementById('cardCaret');
+  const full = defEl.dataset.full || '';
+  caret.classList.add('is-visible');
+  caret.classList.remove('is-blinking');
+  if (prefersReducedMotion() || !full) {
+    textEl.textContent = full;
+    caret.classList.add('is-blinking');
+    return;
+  }
+  textEl.textContent = '';
+  let i = 0;
+  const type = () => {
+    i++;
+    textEl.textContent = full.slice(0, i);
+    if (i >= full.length) {
+      typeTimer = null;
+      caret.classList.add('is-blinking');
+      return;
+    }
+    const ch = full[i - 1];
+    let delay = 30;
+    if (ch === ',') delay = 150;
+    else if ('.;:!?'.includes(ch)) delay = 230;
+    typeTimer = setTimeout(type, delay);
+  };
+  typeTimer = setTimeout(type, 60);
+}
+function flip() {
+  flipped = !flipped;
+  document.getElementById('flashcard').classList.toggle('is-flipped', flipped);
+  const caret = document.getElementById('cardCaret');
+  if (flipped) {
+    // Clear the definition and start "typing" it as the back face rotates in.
+    cancelTypewriter();
+    if (!prefersReducedMotion()) document.getElementById('cardDefText').textContent = '';
+    caret.classList.add('is-visible');
+    caret.classList.remove('is-blinking');
+    typeTimer = setTimeout(startTypewriter, 280);
+  } else {
+    // Flipping back to the front: stop typing and restore the full text.
+    cancelTypewriter();
+    document.getElementById('cardDefText').textContent = document.getElementById('cardDef').dataset.full || '';
+    caret.classList.remove('is-visible', 'is-blinking');
+  }
+}
 function advance(dir) {
   const deck = buildDeck();
   flipped = false;
