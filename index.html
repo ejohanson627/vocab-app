@@ -13293,7 +13293,6 @@ function startTypewriter() {
   if (prefersReducedMotion()) {
     defText.textContent = defFull;
     exText.textContent = exFull;
-    (exFull ? exCaret : defCaret).classList.add('is-visible', 'is-blinking');
     return;
   }
 
@@ -13301,12 +13300,12 @@ function startTypewriter() {
   exText.textContent = '';
 
   // Type the definition; when it finishes, move the caret down to the example
-  // (if there is one) and type that next.
+  // (if there is one) and type that next. The caret disappears once all the
+  // text has been written.
   defCaret.classList.add('is-visible');
   typeText(defText, defCaret, defFull, 60, () => {
-    if (!exFull) { defCaret.classList.add('is-blinking'); return; }
     hideCaret(defCaret);
-    typeText(exText, exCaret, exFull, 350);
+    if (exFull) typeText(exText, exCaret, exFull, 350, () => hideCaret(exCaret));
   });
 }
 function flip() {
