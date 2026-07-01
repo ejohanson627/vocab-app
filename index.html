@@ -201,13 +201,21 @@ if ('serviceWorker' in navigator) {
   .lex-pron { font-size: 13px; color: var(--muted); letter-spacing: 0.02em; margin-top: 2px; }
   .lex-back-body { gap: 16px; padding: 6px 4px; }
   .lex-def {
+    position: relative;
     font-family: var(--serif); font-size: 27px; line-height: 1.22;
     color: var(--ink); font-weight: 500; text-wrap: pretty;
   }
+  /* The caret is positioned absolutely so it never takes up layout space and
+     therefore can't nudge words onto another line while "writing". */
   .lex-caret {
-    display: inline-block; width: 0.66em; height: 0.66em; margin-left: 5px;
-    background: var(--ink); vertical-align: 0.02em; border-radius: 50%; opacity: 0;
+    position: absolute; left: 0; top: 0;
+    width: 0.5em; height: 0.5em; border-radius: 50%;
+    background: var(--ink); opacity: 0; pointer-events: none;
+    transform: translateY(-50%);
   }
+  /* Not-yet-typed characters are kept in the DOM but invisible so that the
+     full text's line wrapping and centering are fixed from the start. */
+  .lex-untyped { color: transparent; }
   .lex-caret.is-visible { opacity: 1; }
   .lex-caret.is-blinking { animation: caretblink 1.05s steps(1) infinite; }
   @keyframes caretblink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
@@ -216,6 +224,7 @@ if ('serviceWorker' in navigator) {
   }
   .lex-rule { width: 46px; height: 1px; background: var(--line); }
   .lex-example {
+    position: relative;
     font-family: var(--serif); font-style: italic; font-size: 20px;
     line-height: 1.34; color: var(--ink2); text-wrap: pretty;
   }
@@ -13255,25 +13264,55 @@ function prefersReducedMotion() {
   return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 function hideCaret(caret) { caret.classList.remove('is-visible', 'is-blinking'); }
+// Fill `textEl` with the full text up front, keeping the untyped tail invisible
+// so the layout is reserved. Returns the two spans used to reveal it.
+function reserveText(textEl, full) {
+  textEl.textContent = '';
+  const typed = document.createElement('span');
+  const rest = document.createElement('span');
+  rest.className = 'lex-untyped';
+  typed.textContent = '';
+  rest.textContent = full;
+  textEl.appendChild(typed);
+  textEl.appendChild(rest);
+  return { typed, rest };
+}
+// Place the (absolutely positioned) caret just after the last typed character.
+// Measured with a collapsed Range so it never affects layout.
+function positionCaret(caret, typedNode) {
+  const node = typedNode && typedNode.firstChild;
+  if (!node) return;
+  const range = document.createRange();
+  range.setStart(node, node.length);
+  range.collapse(true);
+  const r = range.getBoundingClientRect();
+  const p = caret.parentElement.getBoundingClientRect();
+  caret.style.left = (r.left - p.left + 4) + 'px';
+  caret.style.top = (r.top - p.top + r.height / 2) + 'px';
+}
 // Type `full` into `textEl` one character at a time, with `caret` trailing the
-// text. Calls onDone() when finished (defaults to leaving the caret blinking).
+// text. The whole string is rendered from the start (untyped part transparent)
+// so every word stays in its final position — nothing reflows while writing.
+// Calls onDone() when finished (defaults to leaving the caret blinking).
 function typeText(textEl, caret, full, delayStart, onDone) {
   caret.classList.add('is-visible');
   caret.classList.remove('is-blinking');
-  textEl.textContent = '';
+  const { typed, rest } = reserveText(textEl, full);
   let i = 0;
   const type = () => {
     i++;
-    textEl.textContent = full.slice(0, i);
+    typed.textContent = full.slice(0, i);
+    rest.textContent = full.slice(i);
+    positionCaret(caret, typed);
     if (i >= full.length) {
       typeTimer = null;
       if (onDone) onDone(); else caret.classList.add('is-blinking');
       return;
     }
     const ch = full[i - 1];
-    let delay = 65;
-    if (ch === ',') delay = 300;
-    else if ('.;:!?'.includes(ch)) delay = 460;
+    let delay = 110;
+    if (ch === ',') delay = 430;
+    else if ('.;:!?'.includes(ch)) delay = 600;
     typeTimer = setTimeout(type, delay);
   };
   typeTimer = setTimeout(type, delayStart);
@@ -13297,7 +13336,10 @@ function startTypewriter() {
   }
 
   defText.textContent = '';
+  // Reserve the example's space now (as invisible text) so the centered card
+  // body doesn't jump upward when the example starts typing after the definition.
   exText.textContent = '';
+  if (exFull) reserveText(exText, exFull);
 
   // Type the definition; when it finishes, move the caret down to the example
   // (if there is one) and type that next. The caret disappears once all the
